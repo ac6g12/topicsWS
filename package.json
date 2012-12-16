@@ -7,6 +7,8 @@
   },
   "dependencies": {
     "express": "3.0.3",
-    "stylus": "*"
+    "stylus": "*",
+	"xml2js": "0.2.2",
+	"js2xmlparser": "0.1.0"
   }
 }
