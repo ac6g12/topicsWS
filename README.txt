@@ -484,4 +484,17 @@ TESTING THE SERVER
 ------------------
 
 	There is a number of client test scripts provided in the 'test' folder of the application.  These scripts are 
-	written in node.js using the HTTP package 
+	written in node.js using the HTTP package (ClientRequest class). As such, the scripts can be easily executed 
+	from command prompt/terminal by navigating to test folder and using the following command:
+
+	node testname	(e.g. node 03POST_createCollection1)
+
+	Each test ouputs the request headers followed by the response headers and the response body (if applicable).
+
+	For convenience, the test script name starts with a number.  These numbers suggest a natural sequence of events
+	that could occur during a client/server session.  However, the scripts can be also executed out of sequence to
+	test how the server handles unexpected requests (e.g. uploading an image to a non-existent collection).
+
+	Additional resources (such as image files) are stored in the 'resources' folder.
+ 
+	The test scripts assume that the service for collection management is running on localhost, port 3000.
