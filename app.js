@@ -43,6 +43,7 @@ app.use(function (req, res, next) {
 
 app.configure(function(){
   app.set('port', process.env.PORT || 3000);
+  //no need for template engines
 //  app.set('views', __dirname + '/views');
 //  app.set('view engine', 'ejs');
   app.use(express.favicon());
@@ -52,7 +53,8 @@ app.configure(function(){
   app.use(express.cookieParser('The A team'));
   app.use(express.session());
   app.use(app.router);
-  app.use(require('stylus').middleware(__dirname + '/public'));
+  //we don't need stylus
+  //app.use(require('stylus').middleware(__dirname + '/public'));
   app.use(express.static(__dirname + '/public'));
 });
 
