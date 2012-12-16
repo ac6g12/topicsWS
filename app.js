@@ -5,9 +5,41 @@
 
 var express = require('express')
   , routes = require('./routes')
+  , collection = require('./routes/collection')
   , http = require('http');
 
 var app = express();
+
+// translate the incoming request body to an object
+// the body should always be an ATOM entry apart from the 
+// image upload (multipart/form-data) ... this is processed by
+// express.bodyParser() and we can safely ignore it :-)
+app.use(function (req, res, next) {
+    if (req.get('Content-Type') == undefined
+        || req.get('Content-Type').indexOf('multipart') == -1) {
+        var data = '';
+        req.setEncoding('utf8');
+        req.on('data', function (chunk) {
+            data += chunk;
+        });
+
+        req.on('end', function () {
+            xml2js = require('xml2js');
+            var parser = new xml2js.Parser({
+                trim: true,
+                explicitArray: false
+            });
+            parser.parseString(data, function (err, result) {
+                req.atomEntry = result;
+                next();
+            });          
+        });
+    } else {
+        // don't handle file uploads
+        next(); 
+    }
+    
+});
 
 app.configure(function(){
   app.set('port', process.env.PORT || 3000);
@@ -29,14 +61,14 @@ app.configure('development', function(){
 });
 
 // root (http://localhost:3000)
-app.get('/', routes.NotAllowed405);											//TODO - return service desc
+app.get('/', routes.index);											//DONE - return service desc
 app.post('/', routes.NotAllowed405);										//405
 app.put('/', routes.NotAllowed405);											//405
 app.delete('/', routes.NotAllowed405);										//405
 
 // /collection
-app.get('/collection', routes.NotAllowed405);								//TODO - return a list of all collections
-app.post('/collection', routes.NotAllowed405);								//TODO - create a new collection
+app.get('/collection', collection.collectionsGet);								//DONE - return a list of all collections
+app.post('/collection', collection.collectionsPost);								//DONE - create a new collection
 app.put('/collection', routes.NotAllowed405);								//405
 app.delete('/collection', routes.NotAllowed405);							//405
 
