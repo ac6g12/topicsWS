@@ -1,0 +1,140 @@
+IMAGE FILES
+-----------
+
+image binary files to be stored in: /public/images
+
+- image file naming convention:		img{collectionID}_{imageID}.{extension}  
+	- for example:     		img12_2.jpg  --> belongs to collection id 12, image id 2, content-type: image/jpeg
+
+
+OTHER DATA storage system
+-------------------------
+
+
+/private/collections
+	|
+	|
+	|---idCounter.txt (contains a sigle number)
+	|
+	|
+	|---/1 (collection id 1 - folder)
+	|	|
+	|	|
+	|	|---collection.json
+	|	|
+	|	|
+	|	|---/comments	
+	|	|	|
+	|	|	|
+	|	|	|---idCounter.txt
+	|	|	|
+	|	|	|
+	|	|	|---1.json (collection comment id 1 - entry)
+	|	|	|
+	|	|	|
+	|	|	|---2.json (collection comment id 2 - entry)
+	|	|	|
+	|	|	V
+	|	|      ... (other comments)
+	|	|
+	|	|	
+	|	|---/metadata	
+	|	|	|
+	|	|	|
+	|	|	|---idCounter.txt
+	|	|	|
+	|	|	|
+	|	|	|---1.json (collection tag id 1 - entry)
+	|	|	|
+	|	|	|
+	|	|	|---2.json (collection tag id 2 - entry)
+	|	|	|
+	|	|	V
+	|	|      ... (other tags)
+	|	|
+	|	|	
+	|	|---/images	
+	|		|
+	|		|
+	|		|---idCounter.txt
+	|		|
+	|		|
+	|		|---/1 (image id 1 - folder)
+	|		|	|
+	|		|	|
+	|		|	|---image.json
+	|		|	|
+	|		|	|
+	|		|	|---/comments
+	|		|	|	|
+	|		|	|	|
+	|		|	|	|---idCounter.txt
+	|		|	|	|
+	|		|	|	|
+	|		|	|	|---1.json (image comment id 1 - entry)
+	|		|	|	|
+	|		|	|	|
+	|		|	|	|---2.json (image comment id 2 - entry)
+	|		|	|	|
+	|		|	|	V
+	|		|	|      ... (other comments)
+	|		|	|
+	|		|	|---/metadata
+	|		|		|
+	|		|		|
+	|		|		|---idCounter.txt
+	|		|		|
+	|		|		|
+	|		|		|---1.json (image tag id 1 - entry)
+	|		|		|
+	|		|		|
+	|		|		|---2.json (image tag id 2 - entry)
+	|		|		|
+	|		|		V
+	|		|	       ... (other tags)
+	|		|	
+	|		|
+	|		|---/2 (image id 2 - folder)
+	|		|	|
+	|		V	|
+	|     ... (other imgs)	|---image.json
+	|			|
+	|			|
+	|			|---/comments
+	|			|	|
+	|			|	|
+	|			|	|---idCounter.txt
+	|			|	|
+	|			|	|
+	|			|	|---1.json (image comment id 1 - entry)
+	|			|	|
+	|			|	|
+	|			|	|---2.json (image comment id 2 - entry)
+	|			|	|
+	|			|	V
+	|			|      ... (other comments)
+	|			|
+	|			|
+	|			|---/metadata
+	|				|
+	|				|
+	|				|---idCounter.txt
+	|				|
+	|				|
+	|				|---1.json (image tag id 1 - entry)
+	|				|
+	|				|
+	|				|---2.json (image tag id 2 - entry)
+	|				|
+	|				V
+	|			       ... (other tags)
+	|
+	|
+	|---/2 (collection id 2 - folder)
+	|	|
+	|	|
+	|	v
+	|	... collection content
+	|			
+	V
+(other collections)
