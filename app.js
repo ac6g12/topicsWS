@@ -27,7 +27,7 @@ app.use(function (req, res, next) {
             xml2js = require('xml2js');
             var parser = new xml2js.Parser({
                 trim: true,
-                explicitArray: false
+                explicitArray: false				
             });
             parser.parseString(data, function (err, result) {
                 req.atomEntry = result;
@@ -75,8 +75,8 @@ app.put('/collection', routes.NotAllowed405);								//405
 app.delete('/collection', routes.NotAllowed405);							//405
 
 // /collection/{col_ID}
-app.get('/collection/:colID', routes.NotAllowed405);						//TODO - return a list of images in the collection
-app.post('/collection/:colID', routes.NotAllowed405);						//TODO - add new image
+app.get('/collection/:colID', routes.collectionsGetById);						//TODO - return a list of images in the collection
+app.post('/collection/:colID', collection.addNewImage);						//TODO - add new image
 app.put('/collection/:colID', routes.NotAllowed405);						//TODO - update collection properties (title, summary)
 app.delete('/collection/:colID', routes.NotAllowed405);						//TODO - delete whole collection (inc images, collection/images metadata and comments)
 
