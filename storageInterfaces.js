@@ -4,7 +4,7 @@
 //GET http://localhost:3000/collection
 //returns the "updated" element (the last modified time of all collections)
 function getAllCollectionsUpdated() {
-  return new Date();
+	return new Date();
 }
 
 //in each function is described the input and the output objects
@@ -66,6 +66,10 @@ function getCollection(collectionId) {
 	return collection;	
 }
 
+function deleteCollection(collectionId) {
+	//collectionId must exist
+}
+
 function getCollectionImagesDescription(collectionId) {
 	//output - descriptio of the image without the binary data
 	var imageDesc = new Object();
@@ -80,17 +84,40 @@ function getCollectionImagesDescription(collectionId) {
 	return imageDescriptions;	
 }
 
-function createImage(collectionId, image) {
+function saveImage(collectionId, imageDetails, image) {
 	//input
-	//image - all the necessary details for uploading image
-	var image = new Object();
-	image.title = "My superb cat";
+	//image - the uploaded image from the multipart/form data - req.files.image
+	//all the necessary details for uploading image
+	//note - the imageDetails.id might already be created
+	//if a binary image is not present as a parameter, imageDetails.id must exist
+	var imageDetails = new Object();
+	imageDetails.title = "My superb cat";
 	//optional
-	image.summary = "This is my superb cat";
-	image.fileName = "imgOfaCat.jpg";
-	image.mimeType = "image/jpeg";
-	image.path = req.files.image.path;//the full path to read the image
+	imageDetails.summary = "This is my superb cat";
 	
+	//image - format
+	// { size: 74643,
+  // path: '/tmp/8ef9c52abe857867fd0a4e9a819d1876',
+  // name: 'edge.png',
+  // type: 'image/png',
+  // hash: false,
+  // lastModifiedDate: Thu Aug 09 2012 20:07:51 GMT-0700 (PDT),
+  // _writeStream: 
+   // { path: '/tmp/8ef9c52abe857867fd0a4e9a819d1876',
+     // fd: 13,
+     // writable: false,
+     // flags: 'w',
+     // encoding: 'binary',
+     // mode: 438,
+     // bytesWritten: 74643,
+     // busy: false,
+     // _queue: [],
+     // _open: [Function],
+     // drainable: true },
+  // length: [Getter],
+  // filename: [Getter],
+  // mime: [Getter] }
+		
 	//output
 	var resultImage = new Object();
 	resultImage.id = 14;
@@ -100,9 +127,8 @@ function createImage(collectionId, image) {
 	resultImage.title = "My superb cat";
 	//optional
 	resultImage.summary = "This is my superb cat";
-	resultImage.fileName = "imgOfaCat.jpg";
 	resultImage.mimeType = "image/jpeg";
-	resultImage.path = req.files.image.path;//the full path to read the image
+	resultImage.path = "/public/images/img12_1.jpg" ;//the full where the image is store
 	return resultImage;
 }
 
@@ -118,10 +144,13 @@ function getImage(collectionId, imageId) {
 	resultImage.summary = "This is my superb cat";
 	resultImage.fileName = "imgOfaCat.jpg";
 	resultImage.mimeType = "image/jpeg";
-	resultImage.path = req.files.image.path;//the full path to read the image
+	resultImage.path = "/public/images/img12_1.jpg";//the full where the image is store
 	return resultImage;
 }
 
+function deleteImage(collectionId, imageId) {
+	//collectionId, imageId must exist
+}
 //returns the "updated" element (the last modified time of all comments associated with a collection)
 function getAllCollectionCommentsUpdated(collectionId) {
 	return new Date();
@@ -142,8 +171,10 @@ function getAllCollectionComments(collectionId) {
 	return comments;
 }
 
-function createCollectionComment(collectionId, comment) {
+function saveCollectionComment(collectionId, comment) {
 	//input
+	//collectionId may be specified in the input comment(in updated object)
+	//node comment.id will be defined for already saved comment
 	var comment = new Object();
 	comment.author = new Object();
 	comment.author.name = "John";
@@ -172,6 +203,10 @@ function getCollectionComment(collectionId, commentId) {
 	return comment;
 }
 
+function deleteCollectionComment(collectionId, commentId) {
+
+}
+
 //returns the "updated" element (the last modified time of all tags associated with a collection)
 function getAllCollectionTagsUpdated(collectionId) {
 	return new Date();
@@ -191,8 +226,9 @@ function getAllCollectionTags(tagId) {
 	return tags;
 }
 
-function createCollectionTag(collectionId, tag) {
+function saveCollectionTag(tag, collectionId) {
 	//input
+	//note if the tag already exists it will have id
 	var tag = new Object();
 	tag.title = "lolcats";
 	
@@ -216,6 +252,9 @@ function getCollectionTag(collectionId, tagId) {
 	return tag;
 }
 
+function deleteCollectionTag(collectionId, tagId) {
+
+}
 //the format of functions for image tags is the same as for collections
 
 //returns the "updated" element (the last modified time of all tags associated with a collection)
@@ -237,8 +276,9 @@ function getAllImageTags(collectionId, imageId) {
 	return tags;
 }
 
-function createImageTag(collectionId, imageId, tag) {
+function saveImageTag(tag, collectionId, imageId) {
 	//input
+	//note - if tag exists it will have id(when we call saveImageTag for updating the tag)
 	var tag = new Object();
 	tag.title = "lolcats";
 	
@@ -260,4 +300,8 @@ function getImageTag(collectionId, imageId, tagId) {
 	tag["app:edited"] = new Date();
 	tag.title = "this is my tag";
 	return tag;
+}
+
+function deleteImageTag(collectionId, imageId, tagId) {
+	//collectionId, imageId, tagId must exists
 }
