@@ -68,6 +68,7 @@ function getCollection(collectionId) {
 
 function deleteCollection(collectionId) {
 	//collectionId must exist
+	//delete all associated images, tags, image tags, comments, and image comments
 }
 
 function getCollectionImagesDescription(collectionId) {
@@ -150,6 +151,7 @@ function getImage(collectionId, imageId) {
 
 function deleteImage(collectionId, imageId) {
 	//collectionId, imageId must exist
+	//delete all associated image tags and image comments
 }
 //returns the "updated" element (the last modified time of all comments associated with a collection)
 function getAllCollectionCommentsUpdated(collectionId) {
