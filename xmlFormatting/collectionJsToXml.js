@@ -1,28 +1,9 @@
 var restState = require("./restState")
-	,formattingObjects = require("./formattingObjects");
+	,formattingObjects = require("./formattingObjects")
+	,imageJsToXml = require("./imageJsToXml");
 
 //POST http://localhost:3000/collection
 exports.collectionPostResponse = function(newCollection, hostUrl) {
-	//TODO - use optional are mandatory fields
-	// var serviceFeed = {
-		// "$": {
-			// "xmlns" : "http://www.w3.org/2005/Atom",
-			// "xmlns:app" : "http://www.w3.org/2007/app"
-		// },
-		// id : "http://vac.co.uk/collection/" + newCollection.store.id,
-		// updated : newCollection.store.updateTime,
-		// "app:edited" : newCollection.store.editTime,
-		// author : newCollection.entry.author,
-		// title : newCollection.entry.title,
-		// // title : {
-			// // "$": {
-				// // type : "text"
-			// // },
-			// // "_": newCollection.entry.title["_"]
-		// // },
-		// summary : newCollection.entry.summary,
-		// link : createCollectionGetOrPostLinks(newCollection.store.id, hostUrl)
-	// };
 	var serviceFeed = getFormattedCollection(hostUrl, newCollection);
 	serviceFeed["$"] = formattingObjects.addAtomAttribute();
 	return serviceFeed;
@@ -37,19 +18,49 @@ exports.collectionGetResponse = function(updateTime, hostUrl, storedCollections)
 	serviceFeed["title"]["$"] = formattingObjects.createSingleAttribute("type", "text");
 	serviceFeed["title"]["_"] = "Image Collections";
 	serviceFeed["updated"] = updateTime;
-	serviceFeed["app:collection"] = new Object();
-	serviceFeed["app:collection"]["$"] = formattingObjects.createSingleAttribute(
-			"href", hostUrl + "/collection");
-	serviceFeed["app:collection"]["title"] = "Image Collections Service";
-	serviceFeed["app:collection"]["app:accept"] = "application/atom+xml;type=entry";
+	serviceFeed["app:collection"] = getCollectionReference(hostUrl);
+	// new Object();
+	// serviceFeed["app:collection"]["$"] = formattingObjects.createSingleAttribute(
+			// "href", hostUrl + "/collection");
+	// serviceFeed["app:collection"]["title"] = "Image Collections Service";
+	// serviceFeed["app:collection"]["app:accept"] = "application/atom+xml;type=entry";
 	serviceFeed["entry"] = getFormattedCollections(storedCollections, hostUrl);
 	return serviceFeed;
 }
 
+//GET http://localhost:3000/collection/{col_ID}/	
+function getCollectionReference(hostUrl) {
+	var collectionReference =  new Object();
+	collectionReference["$"] = formattingObjects.createSingleAttribute(
+			"href", hostUrl + "/collection");
+	collectionReference["title"] = "Image Collections Service";
+	collectionReference["app:accept"] = "application/atom+xml;type=entry";
+	return collectionReference;
+}
+
+//GET http://localhost:3000/collection/{col_ID}/
+exports.getCollectionImages = function(hostUrl, storedCollection, imageDescriptions) {
+	storedCollection["app:collection"] = getCollectionReference(hostUrl);
+	var imageEntries = imageJsToXml.getFormattedImageDescriptions(hostUrl, 
+		storedCollection, imageDescriptions);
+	//changing and appending storedCollection
+	var serviceFeed = getFormattedCollection(hostUrl, storedCollection);
+	serviceFeed["entry"] = imageEntries;
+	serviceFeed["$"] = formattingObjects.addAtomAttribute();
+	return serviceFeed;
+}
+
+exports.updateCollectionProperties = function(hostUrl, storedCollection) {
+	var serviceFeed = getFormattedCollection(hostUrl, storedCollection);
+	serviceFeed["$"] = formattingObjects.addAtomAttribute();
+	return serviceFeed;
+}
+
 function getFormattedCollection(hostUrl, storedCollection) {
+	var originalId = storedCollection.id;
 	storedCollection["id"] =  "http://vac.co.uk/collection/" + storedCollection.id;
 	storedCollection["title"] = formattingObjects.stringToTitle(storedCollection["title"]);
-	storedCollection["link"] = createCollectionGetOrPostLinks(storedCollection.id, hostUrl);
+	storedCollection["link"] = createCollectionLinks(originalId, hostUrl);
 	return storedCollection;
 }
 
@@ -64,7 +75,7 @@ function getFormattedCollections(storedCollections, hostUrl) {
 }
 
 //GET or POST on http://localhost:3000/collection/
-function createCollectionGetOrPostLinks(collectionId, hostUrl) {
+function createCollectionLinks(collectionId, hostUrl) {
 	var links = []
 		,href = hostUrl + "/collection/" + collectionId;
 	

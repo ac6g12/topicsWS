@@ -4,7 +4,7 @@
 //GET http://localhost:3000/collection
 //returns the "updated" element (the last modified time of all collections)
 function getAllCollectionsUpdated() {
-	return new Date();
+	return new Date().toISOString();
 }
 
 //in each function is described the input and the output objects
@@ -12,8 +12,8 @@ function getAllCollections() {
 	//output
 	var collection = new Object();
 	collection.id = 1;
-	collection.updated = new Date();//last update of a collection
-	collection["app:edited"] = new Date();
+	collection.updated = new Date().toISOString();//last update of a collection
+	collection["app:edited"] = new Date().toISOString();
 	collection.author = new Object();
 	collection.author.name = "John"; 
 	collection.title = "Collection of special cats";
@@ -38,8 +38,8 @@ function saveCollection(collection) {
 	var resultCollection = new Object();
 	//filled in by storage
 	resultCollection.id = 1;
-	resultCollection.updated = new Date();//last update of a collection
-	resultCollection["app:edited"] = new Date();
+	resultCollection.updated = new Date().toISOString();//last update of a collection
+	resultCollection["app:edited"] = new Date().toISOString();
 	
 	//the same as input
 	resultCollection.author = collection.author;
@@ -53,10 +53,11 @@ function getCollection(collectionId) {
 	//input: the id of the collection, ie 1
 	
 	//output - collection object
+	//if collectionId does not exist - return null
 	var collection = new Object();
 	collection.id = 1;
-	collection.updated = new Date();//last update of a collection
-	collection["app:edited"] = new Date();
+	collection.updated = new Date().toISOString();//last update of a collection
+	collection["app:edited"] = new Date().toISOString();
 	collection.author = new Object();
 	collection.author.name = "John"; 
 	collection.title = "Collection of special cats";
@@ -69,16 +70,22 @@ function getCollection(collectionId) {
 function deleteCollection(collectionId) {
 	//collectionId must exist
 	//delete all associated images, tags, image tags, comments, and image comments
+	//for successful deletion - return true
+	//for unsuccessful - return false
 }
 
 function getCollectionImagesDescription(collectionId) {
-	//output - descriptio of the image without the binary data
+	//output - description of the image without the binary data
+	//if collection or images do not exist - return null;
 	var imageDesc = new Object();
 	imageDesc.id = 2;
-	imageDesc.updated = new Date();//last update of a collection
-	imageDesc["app:edited"] = new Date();
-	imageDesc.title = "wiki_cat.jpg";//what the autor calls it
-	imageDesc.content = "img12_1.jpg";//the actual image name, used to access it's location
+	imageDesc.updated = new Date().toISOString();//last update of a collection
+	imageDesc["app:edited"] = new Date().toISOString();
+	imageDesc.title = "wiki_cat";//what the autor calls it
+	//optional
+	imageDesc.summary = "wiki cat summary";
+	imageDesc.mimeType = "image/jpeg";
+	imageDesc.path = "/public/images/img12_1.jpg" ;//the full path (except the host) where the image is stored
 	
 	var imageDescriptions = [];
 	imageDescriptions[0] = imageDesc;
@@ -122,8 +129,8 @@ function saveImage(collectionId, imageDetails, image) {
 	//output
 	var resultImage = new Object();
 	resultImage.id = 14;
-	resultImage.updated = new Date();//last update of a image
-	resultImage["app:edited"] = new Date();
+	resultImage.updated = new Date().toISOString();//last update of a image
+	resultImage["app:edited"] = new Date().toISOString();
 	//the rest are like the input image
 	resultImage.title = "My superb cat";
 	//optional
@@ -135,10 +142,11 @@ function saveImage(collectionId, imageDetails, image) {
 
 function getImage(collectionId, imageId) {
 	//output - the same as in createImage
+	//if collectionId or imageId do not exist - return null
 	var resultImage = new Object();
 	resultImage.id = imageId;
-	resultImage.updated = new Date();//last update of a image
-	resultImage["app:edited"] = new Date();
+	resultImage.updated = new Date().toISOString();//last update of a image
+	resultImage["app:edited"] = new Date().toISOString();
 	//the rest are like the input image
 	resultImage.title = "My superb cat";
 	//optional
@@ -152,18 +160,21 @@ function getImage(collectionId, imageId) {
 function deleteImage(collectionId, imageId) {
 	//collectionId, imageId must exist
 	//delete all associated image tags and image comments
+	//for successful deletion - return true
+	//for unsuccessful - return false
 }
 //returns the "updated" element (the last modified time of all comments associated with a collection)
 function getAllCollectionCommentsUpdated(collectionId) {
-	return new Date();
+	return new Date().toISOString();
 }
 
 function getAllCollectionComments(collectionId) {
 	//filter comments by collection id
+	//if collectionId does not exist - return null
 	var comment = new Object();
 	comment.id = 1;
-	comment.updated = new Date();//last update of a collection
-	comment["app:edited"] = new Date();
+	comment.updated = new Date().toISOString();//last update of a collection
+	comment["app:edited"] = new Date().toISOString();
 	comment.author = new Object();
 	comment.author.name = "John";
 	comment.title = "this is my comment";
@@ -186,8 +197,8 @@ function saveCollectionComment(collectionId, comment) {
 	//output - exactly like in getAllCollectionComments
 	var resultComment = new Object();
 	resultComment.id = 1;
-	resultComment.updated = new Date();//last update of a collection
-	resultComment["app:edited"] = new Date();
+	resultComment.updated = new Date().toISOString();//last update of a collection
+	resultComment["app:edited"] = new Date().toISOString();
 	resultComment.author = comment.author;
 	resultComment.title = comment.title;
 	return resultComment;
@@ -195,10 +206,11 @@ function saveCollectionComment(collectionId, comment) {
 
 function getCollectionComment(collectionId, commentId) {
 	//output - the same as a single comment in the getAllCollectionComments
+	//if collectionId or commentId do not exist - return null
 	var comment = new Object();
 	comment.id = commentId;
-	comment.updated = new Date();//last update of a collection
-	comment["app:edited"] = new Date();
+	comment.updated = new Date().toISOString();//last update of a collection
+	comment["app:edited"] = new Date().toISOString();
 	comment.author = new Object();
 	comment.author.name = "Jeorge";
 	comment.title = "this is my comment";
@@ -206,21 +218,23 @@ function getCollectionComment(collectionId, commentId) {
 }
 
 function deleteCollectionComment(collectionId, commentId) {
-
+	//on success return true
+	//on failure return false
 }
 
 //returns the "updated" element (the last modified time of all tags associated with a collection)
 function getAllCollectionTagsUpdated(collectionId) {
-	return new Date();
+	return new Date().toISOString();
 }
 
 //the collection metadata
-function getAllCollectionTags(tagId) {
-	//filter comments by tag id
+function getAllCollectionTags(collectionId) {
+	//filter comments by collectionId id
+	//if collection does not exist - return null
 	var tag = new Object();
 	tag.id = 3;
-	tag.updated = new Date();//last update of a collection
-	tag["app:edited"] = new Date();
+	tag.updated = new Date().toISOString();//last update of a collection
+	tag["app:edited"] = new Date().toISOString();
 	tag.title = "this is my tag";
 	
 	var tags = [];
@@ -237,8 +251,8 @@ function saveCollectionTag(tag, collectionId) {
 	//output - the same as a single tag in getAllCollectionTags
 	var resultTag = new Object();
 	resultTag.id = 3;
-	resultTag.updated = new Date();//last update of a collection
-	resultTag["app:edited"] = new Date();
+	resultTag.updated = new Date().toISOString();//last update of a collection
+	resultTag["app:edited"] = new Date().toISOString();
 	resultTag.title = tag.title;
 	
 	return resultTag;
@@ -246,16 +260,18 @@ function saveCollectionTag(tag, collectionId) {
 
 function getCollectionTag(collectionId, tagId) {
 	//output - the same as a single tag in getAllCollectionTags
+	//if collectionId or tagId does not exist - return null
 	var tag = new Object();
 	tag.id = tagId;
-	tag.updated = new Date();//last update of a collection
-	tag["app:edited"] = new Date();
+	tag.updated = new Date().toISOString();//last update of a collection
+	tag["app:edited"] = new Date().toISOString();
 	tag.title = "this is my tag";
 	return tag;
 }
 
 function deleteCollectionTag(collectionId, tagId) {
-
+	//on success - return true
+	//on failure - return false
 }
 //the format of functions for image tags is the same as for collections
 
@@ -267,10 +283,11 @@ function getAllImageTagsUpdated(collectionId, imageId) {
 //the collection metadata
 function getAllImageTags(collectionId, imageId) {
 	//filter comments by tag id
+	//if collectionId or imageId do not exist - return null
 	var tag = new Object();
 	tag.id = 3;
-	tag.updated = new Date();//last update of a collection
-	tag["app:edited"] = new Date();
+	tag.updated = new Date().toISOString();//last update of a collection
+	tag["app:edited"] = new Date().toISOString();
 	tag.title = "this is my tag";
 	
 	var tags = [];
@@ -287,8 +304,8 @@ function saveImageTag(tag, collectionId, imageId) {
 	//output - the same as a single tag in getAllCollectionTags
 	var resultTag = new Object();
 	resultTag.id = 3;
-	resultTag.updated = new Date();//last update of a collection
-	resultTag["app:edited"] = new Date();
+	resultTag.updated = new Date().toISOString();//last update of a collection
+	resultTag["app:edited"] = new Date().toISOString();
 	resultTag.title = tag.title;
 	
 	return resultTag;
@@ -296,14 +313,17 @@ function saveImageTag(tag, collectionId, imageId) {
 
 function getImageTag(collectionId, imageId, tagId) {
 	//output - the same as a single tag in getAllCollectionTags
+	//if collectionId, imageId or tagId - return null
 	var tag = new Object();
 	tag.id = tagId;
-	tag.updated = new Date();//last update of a collection
-	tag["app:edited"] = new Date();
+	tag.updated = new Date().toISOString();//last update of a collection
+	tag["app:edited"] = new Date().toISOString();
 	tag.title = "this is my tag";
 	return tag;
 }
 
 function deleteImageTag(collectionId, imageId, tagId) {
 	//collectionId, imageId, tagId must exists
+	//on success return true
+	//on failure return false
 }

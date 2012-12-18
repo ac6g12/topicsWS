@@ -75,10 +75,10 @@ app.put('/collection', routes.NotAllowed405);								//405
 app.delete('/collection', routes.NotAllowed405);							//405
 
 // /collection/{col_ID}
-app.get('/collection/:colID', routes.collectionsGetById);						//TODO - return a list of images in the collection
+app.get('/collection/:colID', collection.getCollectionImages);						//TODO - return a list of images in the collection
 app.post('/collection/:colID', collection.addNewImage);						//TODO - add new image
-app.put('/collection/:colID', routes.NotAllowed405);						//TODO - update collection properties (title, summary)
-app.delete('/collection/:colID', routes.NotAllowed405);						//TODO - delete whole collection (inc images, collection/images metadata and comments)
+app.put('/collection/:colID', collection.updateCollectionProperties);						//TODO - update collection properties (title, summary)
+app.delete('/collection/:colID', collection.deleteCollection);						//TODO - delete whole collection (inc images, collection/images metadata and comments)
 
 // /collection/{col_ID}/metadata
 app.get('/collection/:colID/metadata', routes.NotAllowed405);				//TODO - return a list of tags associated with the collection
