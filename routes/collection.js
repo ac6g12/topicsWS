@@ -21,14 +21,14 @@ exports.collectionsPost = function (req, res) {
 	newCollection = storage.saveCollection(newCollection);
 	
 	var hostUrl = urlUtils.getHostUrl(req);
-	
-    res.set('Content-Type', 'application/atom+xml');
 	res.set('Location', hostUrl + '/collection/' + newCollection.id);
+    res.set('Content-Type', 'application/atom+xml');
+	
 	//to prevent caching resources
 	res.set('Expires', 'Thu, 01 Dec 1994 16:00:00 GMT');
-	
-    var serviceFeed = new collectionJsToXml.collectionPostResponse(
+	var serviceFeed = new collectionJsToXml.collectionPostResponse(
 		newCollection, urlUtils.getHostUrl(req));
+	
 	//console.dir(serviceFeed);
 	res.send(201, js2xml.parseJsonObjectToXml("entry", serviceFeed));
 };
@@ -67,7 +67,6 @@ exports.getCollectionImages = function(req, res) {
 		
 	res.set('Content-Type', 'application/atom+xml');
 	res.set('Last-Modified', formattingObjects.getHttpHeaderLastModified(storedCollection.updated));
-	res.set('Location', hostUrl + '/collection/' + storedCollection.id);
 	res.send(js2xml.parseJsonObjectToXml("feed", serviceFeed));
 }
 

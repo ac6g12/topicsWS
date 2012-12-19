@@ -42,11 +42,11 @@ exports.getHttpHeaderLastModified = function(isoUpdateTime) {
 	return result.toUTCString();
 }
 
-exports.getCollectionReference = function(referenceLink, title) {
+exports.getCollectionReference = function(referenceLink, title, accepts) {
 	var collectionReference =  new Object();
 	collectionReference["$"] = exports.createSingleAttribute(
 			"href", referenceLink);
 	collectionReference["title"] = title;
-	collectionReference["app:accept"] = "application/atom+xml;type=entry";
+	collectionReference["app:accept"] = accepts;
 	return collectionReference;
 }

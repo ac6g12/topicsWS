@@ -11,7 +11,7 @@ exports.saveCollection = function(collection) {
 	//output
 	var resultCollection = new Object();
 	//filled in by storage
-	resultCollection.id = collection.id;
+	resultCollection.id = 1;
 	resultCollection.updated = new Date().toISOString();//last update of a collection
 	resultCollection["app:edited"] = new Date().toISOString();
 	

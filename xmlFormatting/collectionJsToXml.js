@@ -4,7 +4,7 @@ var restState = require("./restState")
 
 //POST http://localhost:3000/collection
 exports.collectionPostResponse = function(newCollection, hostUrl) {
-	var serviceFeed = getFormattedCollection(hostUrl, newCollection);
+	var serviceFeed = getFormattedCollectionOnPost(hostUrl, newCollection);
 	serviceFeed["$"] = formattingObjects.addAtomAttribute();
 	return serviceFeed;
 }
@@ -23,12 +23,16 @@ exports.collectionGetResponse = function(updateTime, hostUrl, storedCollections)
 
 //GET http://localhost:3000/collection/{col_ID}/	
 function getCollectionReference(hostUrl) {
-	return formattingObjects.getCollectionReference(hostUrl + "/collection", "Image Collections Service");
+	return formattingObjects.getCollectionReference(hostUrl + "/collection", "Image Collections Service", 
+		"application/atom+xml;type=entry");
 }
-
+function getCollectionImagesReference(hostUrl, collectionId) {
+	return formattingObjects.getCollectionReference(hostUrl + "/collection/" + collectionId, "Tagging service this collection",
+		"multipart/form-data");
+}
 //GET http://localhost:3000/collection/{col_ID}/
 exports.getCollectionImages = function(hostUrl, storedCollection, imageDescriptions) {
-	storedCollection["app:collection"] = getCollectionReference(hostUrl);
+	storedCollection["app:collection"] = getCollectionImagesReference(hostUrl, storedCollection.id);
 	var imageEntries = imageJsToXml.getFormattedImageDescriptions(hostUrl, 
 		storedCollection, imageDescriptions);
 	//changing and appending storedCollection
@@ -52,6 +56,14 @@ function getFormattedCollection(hostUrl, storedCollection) {
 	return storedCollection;
 }
 
+function getFormattedCollectionOnPost(hostUrl, storedCollection) {
+	var originalId = storedCollection.id;
+	storedCollection["id"] =  "http://vac.co.uk/collection/" + storedCollection.id;
+	storedCollection["title"] = storedCollection["title"];
+	storedCollection["link"] = createCollectionPostLinks(originalId, hostUrl);
+	return storedCollection;
+}
+
 function getFormattedCollections(storedCollections, hostUrl) {
 	var resultCollections = [];
 	
@@ -68,7 +80,20 @@ function createCollectionLinks(collectionId, hostUrl) {
 		,href = hostUrl + "/collection/" + collectionId;
 	
 	links[0] = new restState.createLink("edit", "application/atom+xml", href);
-	links[1] = new restState.createLink("edit-media", "application/xml", href +  "/image");
+	//links[1] = new restState.createLink("edit-media", "application/atom+xml", href +  "/image");
+	links[1] = new restState.createLink("edit", "application/atom+xml", href + "/comment");
+	links[2] = new restState.createLink("edit", "application/atom+xml", href + "/metadata");
+	// links[4] = new restState.createLink("alternate", "application/xml", href + "?alt=xml");
+	// links[5] = new restState.createLink("alternate", "application/json", href + "?alt=json");
+	return links;
+}
+
+function createCollectionPostLinks(collectionId, hostUrl) {
+	var links = []
+		,href = hostUrl + "/collection/" + collectionId;
+	
+	links[0] = new restState.createLink("edit", "application/atom+xml", href);
+	links[1] = new restState.createLink("edit-media", "application/atom+xml", href +  "/image");
 	links[2] = new restState.createLink("edit", "application/atom+xml", href + "/comment");
 	links[3] = new restState.createLink("edit", "application/atom+xml", href + "/metadata");
 	// links[4] = new restState.createLink("alternate", "application/xml", href + "?alt=xml");

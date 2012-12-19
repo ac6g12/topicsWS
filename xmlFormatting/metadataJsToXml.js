@@ -9,7 +9,8 @@ exports.getAllCollectionTagsAtomFeed = function(updateTime, hostUrl, collection,
 	serviceFeed["updated"] = updateTime;
 	serviceFeed["app:edited"] = updateTime;
 	var referenceLink = hostUrl + '/collection/' + collection.id + "/metadata";
-	serviceFeed["app:collection"] = formattingObjects.getCollectionReference(referenceLink, "Tagging service for this collection");
+	serviceFeed["app:collection"] = formattingObjects.getCollectionReference(referenceLink, 
+		"Tagging service for this collection", "application/atom+xml;type=entry");
 	serviceFeed["link"] = createGetAllCollectionTagLinks(collection.id, hostUrl);
 	serviceFeed["entry"] = getAtomFormattedTags(collection, tags, hostUrl);
 	return serviceFeed;
@@ -67,8 +68,8 @@ function createTagLinks(collectionId, tagId, hostUrl) {
 	var links = []
 		,href = hostUrl + "/collection/" + collectionId + "/metadata/" + tagId ;
 	
-	links[0] = new restState.createLink("alternate", "application/xml", href + "/?alt=xml");
-	links[1] = new restState.createLink("alternate", "application/json", href + "/?alt=json");
+	links[0] = new restState.createLink("alternate", "application/xml", href + "?alt=xml");
+	links[1] = new restState.createLink("alternate", "application/json", href + "?alt=json");
 	links[2] = new restState.createLink("edit", "application/atom+xml", href);
 	return links;
 }
