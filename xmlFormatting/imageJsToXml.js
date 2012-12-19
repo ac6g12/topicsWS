@@ -21,7 +21,7 @@ exports.getAddNewImageResponse = function(hostUrl, collection, imageDescription)
 exports.getFormattedImageDescription = function(hostUrl, collection, storedImageDesc) {
 	storedImageDesc["id"] =  "http://vac.co.uk/collection/" + collection.id + "/image/" + storedImageDesc.id;
 	storedImageDesc["author"] = collection.author;
-	storedImageDesc["title"] = formattingObjects.stringToTitle(storedImageDesc["title"]);
+	storedImageDesc["title"] = storedImageDesc["title"];
 	storedImageDesc["content"] = formatImageContent(hostUrl, storedImageDesc);
 	storedImageDesc["link"] = createImageDescriptionLinks(collection.id, storedImageDesc.id, hostUrl);
 	

@@ -6,18 +6,23 @@ var js2xml = require("../xmlFormatting/js2xml")
 	,imageJsToXml = require("../xmlFormatting/imageJsToXml")
 	,checks = require("../utils/checks");
 
+function isValidCollectionPostEntry(newCollection) {
+	return true;
+}	
 exports.collectionsPost = function (req, res) {
 	var newCollection = req.atomEntry["entry"];
-	newCollection["title"] = formattingObjects.titleToString(newCollection["title"]);
-	//TODO - validate newCollection
+	if (!isValidCollectionPostEntry(newCollection)) {
+		res.send(400);
+		return;
+	}
+	
+	newCollection["title"] = formattingObjects.ensureStringIsAtomTitle(newCollection["title"]);
 	var ifUnmodifiedSince = req.get("If-Unmodified-Since");
-	console.log(ifUnmodifiedSince);
-
 	newCollection = storage.saveCollection(newCollection);
 	
 	var hostUrl = urlUtils.getHostUrl(req);
 	
-    res.set('Content-Type', 'application/atom+xml.');
+    res.set('Content-Type', 'application/atom+xml');
 	res.set('Location', hostUrl + '/collection/' + newCollection.id);
 	//to prevent caching resources
 	res.set('Expires', 'Thu, 01 Dec 1994 16:00:00 GMT');
@@ -31,16 +36,16 @@ exports.collectionsPost = function (req, res) {
 exports.collectionsGet = function (req, res) {
 	var storedCollections = storage.getAllCollections();
 	var updateTime = storage.getAllCollectionsUpdated();
+	if (storedCollections == null || updateTime == null)
+		res.send(404);
+	//console.dir(updateTime);
 	
-	console.dir(updateTime);
-	
-	res.set('Content-Type', 'application/atom+xml.');
-	res.set('Last-Modified', updateTime);
+	res.set('Content-Type', 'application/atom+xml');
+	res.set('Last-Modified', formattingObjects.getHttpHeaderLastModified(updateTime));
 	res.set('Expires', 'Thu, 01 Dec 1994 16:00:00 GMT');
 	
     var serviceFeed = new collectionJsToXml.collectionGetResponse(
 		updateTime, urlUtils.getHostUrl(req), storedCollections);
-	//console.dir(serviceFeed);
 	res.send(js2xml.parseJsonObjectToXml("feed", serviceFeed));
 }
 
@@ -60,28 +65,32 @@ exports.getCollectionImages = function(req, res) {
 	var serviceFeed = collectionJsToXml.getCollectionImages(hostUrl,
 		storedCollection, imageDescriptions);
 		
-	res.set('Content-Type', 'application/atom+xml.');
-	res.set('Last-Modified', storedCollection.updated);
+	res.set('Content-Type', 'application/atom+xml');
+	res.set('Last-Modified', formattingObjects.getHttpHeaderLastModified(storedCollection.updated));
 	res.set('Location', hostUrl + '/collection/' + storedCollection.id);
 	res.send(js2xml.parseJsonObjectToXml("feed", serviceFeed));
 }
 
+function ensureNewImageCorrectTitle(imageDetailsTitle, image) {
+	var title;
+	if (imageDetailsTitle == undefined)
+		title = image.name;
+	else
+		title =  imageDetailsTitle;
+	return formattingObjects.ensureStringIsAtomTitle(title);
+}
+
 exports.addNewImage = function (req, res) {
-	
-	//console.log(req.files.image.path);
-	// console.dir(req.body.title);
-	// if (req.body.summary != undefined)
-		// console.log(req.body.summary);
-	// else
-		// console.log("summary is undefined")
-	// console.dir(req.files.image.name);
-	// console.dir(req.files.image.type);
-	// console.dir(req.files.image.path);
-	
+	if (req.files.image == undefined) {
+		req.send(400);
+		return;
+	}
+
 	var imageDetails = new Object();
 	imageDetails.title = req.body.title;
 	imageDetails.summary = req.body.summary;
 	
+	imageDetails.title = ensureNewImageCorrectTitle(imageDetails.title, req.files.image);
 	collectionId = req.params.colID;
 	
 	var storedImage = storage.saveImage(collectionId, imageDetails, req.files.image);
@@ -90,7 +99,7 @@ exports.addNewImage = function (req, res) {
 	
 	var serviceFeed = imageJsToXml.getAddNewImageResponse(hostUrl,
 		collection, storedImage);
-	res.set('Content-Type', 'application/atom+xml.');
+	res.set('Content-Type', 'application/atom+xml');
 	res.set('Location', hostUrl + '/collection/' + collectionId + '/image' );
 	res.send(201, js2xml.parseJsonObjectToXml("feed", serviceFeed));
 }
@@ -105,16 +114,30 @@ function updateStoredCollection(updatedCollection, storedCollection) {
 		storedCollection["summary"] = updatedCollection["summary"];
 }
 
+function isValidInputUpdateCollection(collection) {
+	if (collection == undefined)
+		return false;
+	if (collection["author"] != undefined || collection["title"] != undefined ||
+		collection["summary"] != undefined)
+		return true;
+	else
+		return false;
+	
+}
+
 exports.updateCollectionProperties = function(req, res) {
 	var updatedCollection = req.atomEntry["entry"];
-	updatedCollection["title"] = formattingObjects.titleToString(updatedCollection["title"]);
+	if (!isValidInputUpdateCollection(updatedCollection)) {
+		res.send(400);
+		return;
+	}
+		
 	//TODO - validate newCollection
 	var ifUnmodifiedSince = req.get("If-Unmodified-Since");
-	console.log(ifUnmodifiedSince);
-	
+		
 	var hostUrl = urlUtils.getHostUrl(req);
 		
-	res.set('Content-Type', 'application/atom+xml.');
+	res.set('Content-Type', 'application/atom+xml');
 	res.set('Location', hostUrl + '/collection/' + req.params.colID);
 	//to prevent caching resources
 	res.set('Expires', 'Thu, 01 Dec 1994 16:00:00 GMT');	
@@ -127,6 +150,7 @@ exports.updateCollectionProperties = function(req, res) {
 	}
 	else {
 		updateStoredCollection(updatedCollection, storedCollection);
+		storedCollection["title"] = formattingObjects.ensureStringIsAtomTitle(storedCollection["title"]);
 		var newCollection = storage.saveCollection(storedCollection);
 		var serviceFeed = collectionJsToXml.updateCollectionProperties(
 			urlUtils.getHostUrl(req), newCollection);
@@ -140,8 +164,11 @@ exports.deleteCollection = function(req, res) {
 	var collectionId = req.params.colID;
 	var result = storage.deleteCollection(collectionId);
 	if (result) {
-		res.send(204);
+		res.writeHead(204, {'Content-Type': 'text/plain'});
+		res.end();
 	}
-	else
-		res.send(404);	
+	else {
+		res.writeHead(404, {'Content-Type': 'text/plain'});
+		res.end();
+	}
 }

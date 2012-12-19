@@ -14,28 +14,16 @@ exports.collectionGetResponse = function(updateTime, hostUrl, storedCollections)
 	var serviceFeed = new Object();
 	serviceFeed["$"] = formattingObjects.addAtomAttribute();
 	serviceFeed["id"] =  "http://vac.co.uk/collection";
-	serviceFeed["title"] = new Object();
-	serviceFeed["title"]["$"] = formattingObjects.createSingleAttribute("type", "text");
-	serviceFeed["title"]["_"] = "Image Collections";
+	serviceFeed["title"] = formattingObjects.stringToTitle("Image Collections"); 
 	serviceFeed["updated"] = updateTime;
 	serviceFeed["app:collection"] = getCollectionReference(hostUrl);
-	// new Object();
-	// serviceFeed["app:collection"]["$"] = formattingObjects.createSingleAttribute(
-			// "href", hostUrl + "/collection");
-	// serviceFeed["app:collection"]["title"] = "Image Collections Service";
-	// serviceFeed["app:collection"]["app:accept"] = "application/atom+xml;type=entry";
 	serviceFeed["entry"] = getFormattedCollections(storedCollections, hostUrl);
 	return serviceFeed;
 }
 
 //GET http://localhost:3000/collection/{col_ID}/	
 function getCollectionReference(hostUrl) {
-	var collectionReference =  new Object();
-	collectionReference["$"] = formattingObjects.createSingleAttribute(
-			"href", hostUrl + "/collection");
-	collectionReference["title"] = "Image Collections Service";
-	collectionReference["app:accept"] = "application/atom+xml;type=entry";
-	return collectionReference;
+	return formattingObjects.getCollectionReference(hostUrl + "/collection", "Image Collections Service");
 }
 
 //GET http://localhost:3000/collection/{col_ID}/
@@ -59,19 +47,19 @@ exports.updateCollectionProperties = function(hostUrl, storedCollection) {
 function getFormattedCollection(hostUrl, storedCollection) {
 	var originalId = storedCollection.id;
 	storedCollection["id"] =  "http://vac.co.uk/collection/" + storedCollection.id;
-	storedCollection["title"] = formattingObjects.stringToTitle(storedCollection["title"]);
+	storedCollection["title"] = storedCollection["title"];
 	storedCollection["link"] = createCollectionLinks(originalId, hostUrl);
 	return storedCollection;
 }
 
 function getFormattedCollections(storedCollections, hostUrl) {
-	var jsonCollections = [];
+	var resultCollections = [];
 	
 	for (var i = 0; i < storedCollections.length; i++) {
-		jsonCollections[i] = new getFormattedCollection(hostUrl, storedCollections[i]);
+		resultCollections[i] = new getFormattedCollection(hostUrl, storedCollections[i]);
 	}
 	
-	return jsonCollections;
+	return resultCollections;
 }
 
 //GET or POST on http://localhost:3000/collection/

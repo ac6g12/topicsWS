@@ -1,4 +1,11 @@
 //storage functions
+function stringToTitle(strTitle) {
+	var title = new Object();
+	title["$"] = new Object();
+	title["$"]["type"] = "text";
+	title["_"] = strTitle;
+	return title;
+}
 
 exports.saveCollection = function(collection) {
 	//output
@@ -32,7 +39,7 @@ function createStoredCollection(entryId)
 	collection["app:edited"] = new Date().toISOString();
 	collection.author = new Object();
 	collection.author.name = "Vladimir " + entryId;
-	collection.title = "Collection of special cats";
+	collection.title = stringToTitle("Collection of special cats");
 	//optional
 	//collection.summary = "favourite lolcatz " + entryId;
 	return collection;
@@ -53,7 +60,7 @@ exports.getCollection = function(collectionId) {
 	collection["app:edited"] = new Date().toISOString();
 	collection.author = new Object();
 	collection.author.name = "John Smith"; 
-	collection.title = "Collection of incredible dogs";
+	collection.title = stringToTitle("Collection of incredible dogs");
 	//optional
 	//collection.summary = "my collection of cats";
 	
@@ -66,7 +73,7 @@ exports.getCollectionImagesDescription = function(collectionId) {
 	imageDesc.id = 2;
 	imageDesc.updated = new Date().toISOString();//last update of a collection
 	imageDesc["app:edited"] = new Date().toISOString();
-	imageDesc.title = "wiki_cat.jpg";//what the autor calls it
+	imageDesc.title = stringToTitle("wiki_cat.jpg");//what the autor calls it
 	imageDesc.mimeType = "image/jpeg";
 	imageDesc.path = "/public/images/img12_1.jpg" ;//the full path (except the host) where the image is stored
 	
@@ -82,7 +89,7 @@ exports.saveImage = function(collectionId, imageDetails, image) {
 	//note - the imageDetails.id might already be created
 	//if a binary image is not present as a parameter, imageDetails.id must exist
 	var imageDetails = new Object();
-	imageDetails.title = "My superb cat";
+	imageDetails.title = stringToTitle("My superb cat");
 	//optional
 	imageDetails.summary = "This is my superb cat";
 	
@@ -115,7 +122,7 @@ exports.saveImage = function(collectionId, imageDetails, image) {
 	resultImage.updated = new Date().toISOString();//last update of a image
 	resultImage["app:edited"] = new Date().toISOString();
 	//the rest are like the input image
-	resultImage.title = "My superb cat";
+	resultImage.title = stringToTitle("My superb cat");
 	//optional
 	resultImage.summary = "This is my superb cat";
 	resultImage.mimeType = "image/jpeg";
@@ -130,26 +137,62 @@ exports.deleteCollection = function(collectionId) {
 	//for unsuccessful - return false
 	return true;
 }
-// //simulates getting entries from storage
-// function getStoreImages(collectionId) {
-	// var imageEntries = [];
-	
-	// //TODO - get from node.js settings
-	// var serverUrl = "http://localhost:3000";
-		
-	// for (var i=1; i <= 1; i++) {
-		// imageEntries[i-1] = new createStoreImage(collectionId, i);
-	// }
-	// return imageEntries;
-// }
-// function createStoreImage(collectionId, entryId)
-// {
-	// this.id = entryId;
-	// this.updateTime = new Date();
-	// this.editTime = new Date();
-	// this.authorName = "Vladimir " + entryId;
-	// this.title = "cats collection";
-	// this.fileName = "img" + collectionId + "_" + entryId + ".jpg";
-// } 
 
-//end of storage functions
+//returns the "updated" element (the last modified time of all tags associated with a collection)
+exports.getAllCollectionTagsUpdated = function(collectionId) {
+	return new Date().toISOString();
+}
+
+//the collection metadata
+exports.getAllCollectionTags = function(collectionId) {
+	//filter comments by collectionId id
+	//if collection does not exist - return null
+	var tag = new Object();
+	tag.id = 3;
+	tag.updated = new Date().toISOString();//last update of a collection
+	tag["app:edited"] = new Date().toISOString();
+	tag.title = stringToTitle("this is my tag");
+	var tag2 = new Object();
+	
+	tag2.id = 4;
+	tag2.updated = new Date().toISOString();//last update of a collection
+	tag2["app:edited"] = new Date().toISOString();
+	tag2.title = stringToTitle("this is my second tag");
+		
+	var tags = [];
+	tags[0] = tag;
+	tags[1] = tag2;
+	return tags;
+}
+
+exports.saveCollectionTag = function(tag, collectionId) {
+	//input
+	// var tag = new Object();
+	// tag.title = "lolcats";
+	
+	//output - the same as a single tag in getAllCollectionTags
+	var resultTag = new Object();
+	resultTag.id = 3;
+	resultTag.updated = new Date().toISOString();//last update of a collection
+	resultTag["app:edited"] = new Date().toISOString();
+	resultTag.title = tag.title;
+	
+	return resultTag;
+}
+
+exports.getCollectionTag = function(collectionId, tagId) {
+	//output - the same as a single tag in getAllCollectionTags
+	//if collectionId or tagId does not exist - return null
+	var tag = new Object();
+	tag.id = tagId;
+	tag.updated = new Date().toISOString();//last update of a collection
+	tag["app:edited"] = new Date().toISOString();
+	tag.title = stringToTitle("this is my tag " + tagId);
+	return tag;
+}
+
+exports.deleteCollectionTag = function(collectionId, tagId) {
+	//on success - return true
+	//on failure - return false
+	return false;
+}

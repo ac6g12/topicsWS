@@ -6,6 +6,7 @@
 var express = require('express')
   , routes = require('./routes')
   , collection = require('./routes/collection')
+  , metadata = require('./routes/metadata')
   , http = require('http');
 
 var app = express();
@@ -81,10 +82,10 @@ app.put('/collection/:colID', collection.updateCollectionProperties);						//TOD
 app.delete('/collection/:colID', collection.deleteCollection);						//TODO - delete whole collection (inc images, collection/images metadata and comments)
 
 // /collection/{col_ID}/metadata
-app.get('/collection/:colID/metadata', routes.NotAllowed405);				//TODO - return a list of tags associated with the collection
-app.post('/collection/:colID/metadata', routes.NotAllowed405);				//TODO - add a new tag
+app.get('/collection/:colID/metadata', metadata.getAllCollectionTags);				//TODO - return a list of tags associated with the collection
+app.post('/collection/:colID/metadata', metadata.addNewCollectionTag);				//TODO - add a new tag
 app.put('/collection/:colID/metadata', routes.NotAllowed405);				//405
-app.delete('/collection/:colID/metadata', routes.NotAllowed405);			//TODO - delete all tags associated with the collection
+app.delete('/collection/:colID/metadata', metadata.deleteAllCollectionTags);			//TODO - delete all tags associated with the collection
 
 // /collection/{col_ID}/metadata/{tag_ID}
 app.get('/collection/:colID/metadata/:tagID', routes.NotAllowed405);		//TODO - return tag entry

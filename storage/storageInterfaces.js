@@ -7,6 +7,15 @@ function getAllCollectionsUpdated() {
 	return new Date().toISOString();
 }
 
+//the title in Atom feed has attribute, so we must add it
+//we call this function each time we have ot use title property in an object
+function stringToTitle(strTitle) {
+	var title = new Object();
+	title["$"] = new Object();
+	title["$"]["type"] = "text";
+	title["_"] = strTitle;
+	return title;
+}
 //in each function is described the input and the output objects
 function getAllCollections() {
 	//output
@@ -16,7 +25,7 @@ function getAllCollections() {
 	collection["app:edited"] = new Date().toISOString();
 	collection.author = new Object();
 	collection.author.name = "John"; 
-	collection.title = "Collection of special cats";
+	collection.title = stringToTitle("Collection of special cats");
 	//optional
 	collection.summary = "my collection of cats";
 	
@@ -30,7 +39,7 @@ function saveCollection(collection) {
 	var collection = new Object();
 	collection.author = new Object();
 	collection.author.name = "John"; 
-	collection.title = "Collection of special cats";
+	collection.title = stringToTitle("Collection of special cats");
 	//optional
 	collection.summary = "my collection of cats";
 	
@@ -60,7 +69,7 @@ function getCollection(collectionId) {
 	collection["app:edited"] = new Date().toISOString();
 	collection.author = new Object();
 	collection.author.name = "John"; 
-	collection.title = "Collection of special cats";
+	collection.title = stringToTitle("Collection of special cats");
 	//optional
 	collection.summary = "my collection of cats";
 	
@@ -81,7 +90,7 @@ function getCollectionImagesDescription(collectionId) {
 	imageDesc.id = 2;
 	imageDesc.updated = new Date().toISOString();//last update of a collection
 	imageDesc["app:edited"] = new Date().toISOString();
-	imageDesc.title = "wiki_cat";//what the autor calls it
+	imageDesc.title = stringToTitle("wiki_cat");//what the autor calls it
 	//optional
 	imageDesc.summary = "wiki cat summary";
 	imageDesc.mimeType = "image/jpeg";
@@ -99,7 +108,7 @@ function saveImage(collectionId, imageDetails, image) {
 	//note - the imageDetails.id might already be created
 	//if a binary image is not present as a parameter, imageDetails.id must exist
 	var imageDetails = new Object();
-	imageDetails.title = "My superb cat";
+	imageDetails.title = stringToTitle("My superb cat");
 	//optional
 	imageDetails.summary = "This is my superb cat";
 	
@@ -132,7 +141,7 @@ function saveImage(collectionId, imageDetails, image) {
 	resultImage.updated = new Date().toISOString();//last update of a image
 	resultImage["app:edited"] = new Date().toISOString();
 	//the rest are like the input image
-	resultImage.title = "My superb cat";
+	resultImage.title = stringToTitle("My superb cat");
 	//optional
 	resultImage.summary = "This is my superb cat";
 	resultImage.mimeType = "image/jpeg";
@@ -148,7 +157,7 @@ function getImage(collectionId, imageId) {
 	resultImage.updated = new Date().toISOString();//last update of a image
 	resultImage["app:edited"] = new Date().toISOString();
 	//the rest are like the input image
-	resultImage.title = "My superb cat";
+	resultImage.title = stringToTitle("My superb cat");
 	//optional
 	resultImage.summary = "This is my superb cat";
 	resultImage.fileName = "imgOfaCat.jpg";
@@ -177,7 +186,7 @@ function getAllCollectionComments(collectionId) {
 	comment["app:edited"] = new Date().toISOString();
 	comment.author = new Object();
 	comment.author.name = "John";
-	comment.title = "this is my comment";
+	comment.title = stringToTitle("this is my comment");
 	
 	var comments = [];
 	comments[0] = comment;
@@ -191,7 +200,7 @@ function saveCollectionComment(collectionId, comment) {
 	var comment = new Object();
 	comment.author = new Object();
 	comment.author.name = "John";
-	comment.title = "this is my comment";
+	comment.title = stringToTitle("this is my comment");
 	
 	
 	//output - exactly like in getAllCollectionComments
@@ -213,7 +222,7 @@ function getCollectionComment(collectionId, commentId) {
 	comment["app:edited"] = new Date().toISOString();
 	comment.author = new Object();
 	comment.author.name = "Jeorge";
-	comment.title = "this is my comment";
+	comment.title = stringToTitle("this is my comment");
 	return comment;
 }
 
@@ -265,7 +274,7 @@ function getCollectionTag(collectionId, tagId) {
 	tag.id = tagId;
 	tag.updated = new Date().toISOString();//last update of a collection
 	tag["app:edited"] = new Date().toISOString();
-	tag.title = "this is my tag";
+	tag.title = stringToTitle("this is my tag");
 	return tag;
 }
 
@@ -288,7 +297,7 @@ function getAllImageTags(collectionId, imageId) {
 	tag.id = 3;
 	tag.updated = new Date().toISOString();//last update of a collection
 	tag["app:edited"] = new Date().toISOString();
-	tag.title = "this is my tag";
+	tag.title = stringToTitle("this is my tag");
 	
 	var tags = [];
 	tags[0] = tag;
@@ -299,7 +308,7 @@ function saveImageTag(tag, collectionId, imageId) {
 	//input
 	//note - if tag exists it will have id(when we call saveImageTag for updating the tag)
 	var tag = new Object();
-	tag.title = "lolcats";
+	tag.title = stringToTitle("lolcats");
 	
 	//output - the same as a single tag in getAllCollectionTags
 	var resultTag = new Object();
@@ -318,7 +327,7 @@ function getImageTag(collectionId, imageId, tagId) {
 	tag.id = tagId;
 	tag.updated = new Date().toISOString();//last update of a collection
 	tag["app:edited"] = new Date().toISOString();
-	tag.title = "this is my tag";
+	tag.title = stringToTitle("this is my tag");
 	return tag;
 }
 
