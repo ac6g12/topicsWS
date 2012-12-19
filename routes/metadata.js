@@ -64,18 +64,17 @@ exports.addNewCollectionTag = function(req, res) {
 	}
 	var tag = new Object();
 	tag.title = req.atomEntry["entry"]["title"];
-	console.log(tag.title);
+	//console.log(tag.title);
 	tag.title = formattingObjects.ensureStringIsAtomTitle(tag.title);
-	console.log(tag.title);
+	//console.log(tag.title);
 	
 	//tag.title = formattingObjects.titleToString(req.atomEntry["entry"]["title"]);
 	
 	var storedTag = storage.saveCollectionTag(tag, collectionId);
 	var hostUrl = urlUtils.getHostUrl(req);
 	
-	var entry = metadataJsToXml.addNewCollectionTag(hostUrl,
+	var entry = metadataJsToXml.CollectionTagAtom(hostUrl,
 		collection, storedTag);
-	res.set('201 Created');
 	res.set('Content-Type', 'application/atom+xml');
 	var location = hostUrl + '/collection/' + collectionId + '/image' + "/metadata/" + tag.id;
 	res.set('Location', location);
@@ -111,5 +110,100 @@ exports.deleteAllCollectionTags = function(req, res) {
 }
 
 exports.getCollectionTag = function(req, res) {
-	//TODO
+	collectionId = req.params.colID;
+	var collection = storage.getCollection(collectionId);
+	var tagId = req.params.tagID;
+	var tag = storage.getCollectionTag(collectionId, tagId);
+	if (collection == null || tag == null) {
+		res.send(404);
+		return;
+	}
+	
+	var hostUrl = urlUtils.getHostUrl(req);
+	
+	var representation = req.query.alt;
+	if (checks.isEmptyObject(req.query) && representation == undefined) {
+		res.set('Content-Type', 'application/atom+xml');
+		var entry = new metadataJsToXml.CollectionTagAtom(
+			urlUtils.getHostUrl(req), collection, tag);
+		res.send(js2xml.parseJsonObjectToXml("entry", entry));
+	}
+	else if (!checks.isEmptyObject(req.query) && representation == "xml") {
+		res.set('Content-Type', 'application/xml');
+		var metadata = new metadataJsToXml.getCollectionTagXmlJson(
+			collection, tag);
+		res.send(js2xml.parseJsonObjectToXml("metadata", metadata));
+	}
+	else if (!checks.isEmptyObject(req.query) && representation == "json") {
+		res.set('Content-Type', 'application/json');
+		var metadata = new metadataJsToXml.getCollectionTagXmlJson(
+			collection, tag);
+		
+		res.send(JSON.stringify(metadata));
+	}
+	else {
+		res.send(400, "Bad requrest, invalid representation required: " + JSON.stringify(req.query));
+	}
+}
+
+function isValidInputUpdateTag(updatedTag) {
+	if (updatedTag != undefined && updatedTag["title"] != undefined)
+		return true;
+	else
+		return false;
+	
+}
+
+exports.updateCollectionTag = function(req, res) {
+	var updatedTag = req.atomEntry["entry"];
+	if (!isValidInputUpdateTag(updatedTag)) {
+		res.send(400);
+		return;
+	}
+		
+	//TODO - validate newCollection
+	var ifUnmodifiedSince = req.get("If-Unmodified-Since");
+		
+	var hostUrl = urlUtils.getHostUrl(req);
+		
+	res.set('Content-Type', 'application/atom+xml');
+	//to prevent caching resources
+	res.set('Expires', 'Thu, 01 Dec 1994 16:00:00 GMT');	
+	var collection = storage.getCollection(req.params.colID);
+	var storedTag = storage.getCollectionTag(req.params.colID, req.params.tagID);
+	if (collection == null || storedTag == null) {
+		res.send(404);
+		return;
+	}
+	var hostUrl = urlUtils.getHostUrl(req);
+	
+	console.log("if undmodified since:" + Date.parse(ifUnmodifiedSince));
+	console.log("updated:" + Date.parse(storedTag.updated));
+	if (checks.isModifiedSince(ifUnmodifiedSince, storedTag.updated)) {
+		var entry = new metadataJsToXml.CollectionTagAtom(
+			urlUtils.getHostUrl(req), collection, storedTag);
+		res.send(409, js2xml.parseJsonObjectToXml("entry", entry));
+	}
+	else {
+		storedTag["title"] = formattingObjects.ensureStringIsAtomTitle(updatedTag["title"]);
+		var newTag = storage.saveCollectionTag(storedTag, collection.id);
+		var entry = metadataJsToXml.CollectionTagAtom(
+			urlUtils.getHostUrl(req), collection, newTag);
+		res.send(200, js2xml.parseJsonObjectToXml("entry", entry));
+	}
+}
+
+exports.deleteTag = function(req, res) {
+	var collectionId = req.params.colID;
+	var tagId = req.params.tagID;
+	var result = storage.deleteCollectionTag(collectionId, tagId);
+	
+	if (result) {
+		res.writeHead(204, {'Content-Type': 'text/plain'});
+		res.end();
+	}
+	else {
+		res.writeHead(404, {'Content-Type': 'text/plain'});
+		res.end();
+	}
 }

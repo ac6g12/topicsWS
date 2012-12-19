@@ -68,7 +68,7 @@ exports.getCollection = function(collectionId) {
 }
 
 exports.getCollectionImagesDescription = function(collectionId) {
-	//output - descriptio of the image without the binary data
+	//output - description of the image without the binary data
 	var imageDesc = new Object();
 	imageDesc.id = 2;
 	imageDesc.updated = new Date().toISOString();//last update of a collection
@@ -80,6 +80,20 @@ exports.getCollectionImagesDescription = function(collectionId) {
 	var imageDescriptions = [];
 	imageDescriptions[0] = imageDesc;
 	return imageDescriptions;	
+}
+
+exports.getCollectionImageDescription = function(collectionId, imageId) {
+	//output - description of the image without the binary data
+	var imageDesc = new Object();
+	imageDesc.id = 2;
+	imageDesc.updated = new Date().toISOString();//last update of a collection
+	imageDesc["app:edited"] = new Date().toISOString();
+	imageDesc.title = stringToTitle("wiki_cat.jpg");//what the autor calls it
+	imageDesc.summary = "This is my superb cat";
+	imageDesc.mimeType = "image/jpeg";
+	imageDesc.path = "/public/images/img12_1.jpg" ;//the full path (except the host) where the image is stored
+	
+	return imageDesc;
 }
 
 exports.saveImage = function(collectionId, imageDetails, image) {
@@ -180,6 +194,13 @@ exports.saveCollectionTag = function(tag, collectionId) {
 	return resultTag;
 }
 
+exports.deleteImage = function(collectionId, imageId) {
+	//collectionId, imageId must exist
+	//delete all associated image tags and image comments
+	//for successful deletion - return true
+	//for unsuccessful - return false
+	return false;
+}
 exports.getCollectionTag = function(collectionId, tagId) {
 	//output - the same as a single tag in getAllCollectionTags
 	//if collectionId or tagId does not exist - return null

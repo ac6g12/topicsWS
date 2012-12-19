@@ -6,6 +6,7 @@
 var express = require('express')
   , routes = require('./routes')
   , collection = require('./routes/collection')
+  , image = require('./routes/image')
   , metadata = require('./routes/metadata')
   , http = require('http');
 
@@ -77,7 +78,7 @@ app.delete('/collection', routes.NotAllowed405);							//405
 
 // /collection/{col_ID}
 app.get('/collection/:colID', collection.getCollectionImages);						//TODO - return a list of images in the collection
-app.post('/collection/:colID', collection.addNewImage);						//TODO - add new image
+app.post('/collection/:colID', image.addNewImage);						//TODO - add new image
 app.put('/collection/:colID', collection.updateCollectionProperties);						//TODO - update collection properties (title, summary)
 app.delete('/collection/:colID', collection.deleteCollection);						//TODO - delete whole collection (inc images, collection/images metadata and comments)
 
@@ -88,10 +89,10 @@ app.put('/collection/:colID/metadata', routes.NotAllowed405);				//405
 app.delete('/collection/:colID/metadata', metadata.deleteAllCollectionTags);			//TODO - delete all tags associated with the collection
 
 // /collection/{col_ID}/metadata/{tag_ID}
-app.get('/collection/:colID/metadata/:tagID', routes.NotAllowed405);		//TODO - return tag entry
+app.get('/collection/:colID/metadata/:tagID', metadata.getCollectionTag);		//TODO - return tag entry
 app.post('/collection/:colID/metadata/:tagID', routes.NotAllowed405);		//405
-app.put('/collection/:colID/metadata/:tagID', routes.NotAllowed405);		//TODO - update tag entry
-app.delete('/collection/:colID/metadata/:tagID', routes.NotAllowed405);		//TODO - delete the tag
+app.put('/collection/:colID/metadata/:tagID', metadata.updateCollectionTag);		//TODO - update tag entry
+app.delete('/collection/:colID/metadata/:tagID', metadata.deleteTag);		//TODO - delete the tag
 
 // /collection/{col_ID}/comment
 app.get('/collection/:colID/comment', routes.NotAllowed405);				//TODO - return a list of comments associated with the collection
@@ -106,10 +107,10 @@ app.put('/collection/:colID/comment/:comID', routes.NotAllowed405);			//TODO - u
 app.delete('/collection/:colID/comment/:comID', routes.NotAllowed405);		//TODO - delete the comment
 
 // /collection/{col_ID}/image/{img_ID}
-app.get('/collection/:colID/image/:imgID', routes.NotAllowed405);			//TODO - return image entry
+app.get('/collection/:colID/image/:imgID', image.getImage);			//TODO - return image entry
 app.post('/collection/:colID/image/:imgID', routes.NotAllowed405);			//405
-app.put('/collection/:colID/image/:imgID', routes.NotAllowed405);			//TODO - update image entry AND/OR image binary data
-app.delete('/collection/:colID/image/:imgID', routes.NotAllowed405);		//TODO - delete the image (inc its metadata and comments)
+app.put('/collection/:colID/image/:imgID', image.updateImage);			//TODO - update image entry AND/OR image binary data
+app.delete('/collection/:colID/image/:imgID', image.deleteImage);		//TODO - delete the image (inc its metadata and comments)
 
 // /collection/{col_ID}/image/{img_ID}/metadata
 app.get('/collection/:colID/image/:imgID/metadata', routes.NotAllowed405);		//TODO - return a list of tags associated with the image

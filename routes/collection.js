@@ -71,39 +71,6 @@ exports.getCollectionImages = function(req, res) {
 	res.send(js2xml.parseJsonObjectToXml("feed", serviceFeed));
 }
 
-function ensureNewImageCorrectTitle(imageDetailsTitle, image) {
-	var title;
-	if (imageDetailsTitle == undefined)
-		title = image.name;
-	else
-		title =  imageDetailsTitle;
-	return formattingObjects.ensureStringIsAtomTitle(title);
-}
-
-exports.addNewImage = function (req, res) {
-	if (req.files.image == undefined) {
-		req.send(400);
-		return;
-	}
-
-	var imageDetails = new Object();
-	imageDetails.title = req.body.title;
-	imageDetails.summary = req.body.summary;
-	
-	imageDetails.title = ensureNewImageCorrectTitle(imageDetails.title, req.files.image);
-	collectionId = req.params.colID;
-	
-	var storedImage = storage.saveImage(collectionId, imageDetails, req.files.image);
-	var collection = storage.getCollection(collectionId);
-	var hostUrl = urlUtils.getHostUrl(req);
-	
-	var serviceFeed = imageJsToXml.getAddNewImageResponse(hostUrl,
-		collection, storedImage);
-	res.set('Content-Type', 'application/atom+xml');
-	res.set('Location', hostUrl + '/collection/' + collectionId + '/image' );
-	res.send(201, js2xml.parseJsonObjectToXml("feed", serviceFeed));
-}
-
 //changes some of the fields of storedCollection according to updateCollection
 function updateStoredCollection(updatedCollection, storedCollection) {
 	if (updatedCollection["author"] != undefined)
@@ -138,25 +105,21 @@ exports.updateCollectionProperties = function(req, res) {
 	var hostUrl = urlUtils.getHostUrl(req);
 		
 	res.set('Content-Type', 'application/atom+xml');
-	res.set('Location', hostUrl + '/collection/' + req.params.colID);
 	//to prevent caching resources
 	res.set('Expires', 'Thu, 01 Dec 1994 16:00:00 GMT');	
-	storedCollection = storage.getCollection(req.params.colID);
+	var storedCollection = storage.getCollection(req.params.colID);
 	if (checks.isModifiedSince(ifUnmodifiedSince, storedCollection.updated)) {
-		var serviceFeed = new collectionJsToXml.updateCollectionProperties(
+		var entry = new collectionJsToXml.updateCollectionProperties(
 			urlUtils.getHostUrl(req), storedCollection);
-		//console.dir(serviceFeed);	
-		res.send(409, js2xml.parseJsonObjectToXml("entry", serviceFeed));
+		res.send(409, js2xml.parseJsonObjectToXml("entry", entry));
 	}
 	else {
 		updateStoredCollection(updatedCollection, storedCollection);
 		storedCollection["title"] = formattingObjects.ensureStringIsAtomTitle(storedCollection["title"]);
 		var newCollection = storage.saveCollection(storedCollection);
-		var serviceFeed = collectionJsToXml.updateCollectionProperties(
+		var entry = collectionJsToXml.updateCollectionProperties(
 			urlUtils.getHostUrl(req), newCollection);
-		//console.dir(serviceFeed);
-		//res.send(200);
-		res.send(200, js2xml.parseJsonObjectToXml("entry", serviceFeed));
+		res.send(js2xml.parseJsonObjectToXml("entry", entry));
 	}
 }
 

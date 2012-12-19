@@ -101,6 +101,21 @@ function getCollectionImagesDescription(collectionId) {
 	return imageDescriptions;	
 }
 
+function getCollectionImageDescription (collectionId, imageId) {
+	//output - description of the image without the binary data
+	var imageDesc = new Object();
+	imageDesc.id = 2;
+	imageDesc.updated = new Date().toISOString();//last update of a collection
+	imageDesc["app:edited"] = new Date().toISOString();
+	imageDesc.title = stringToTitle("wiki_cat.jpg");//what the autor calls it
+	//optional
+	imageDesc.summary = "wiki cat summary";
+	imageDesc.mimeType = "image/jpeg";
+	imageDesc.path = "/public/images/img12_1.jpg" ;//the full path (except the host) where the image is stored
+	
+	return imageDesc;
+}
+
 function saveImage(collectionId, imageDetails, image) {
 	//input
 	//image - the uploaded image from the multipart/form data - req.files.image

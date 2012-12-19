@@ -5,14 +5,14 @@ exports.getFormattedImageDescriptions = function(hostUrl, collection, imageDescr
 	var result = [];
 	
 	for (var i = 0; i < imageDescriptions.length; i++) {
-		result[i] = new exports.getFormattedImageDescription(hostUrl, collection, imageDescriptions[i]);
+		result[i] = exports.getFormattedImageDescription(hostUrl, collection, imageDescriptions[i]);
 	}
 	
 	return result;
 }
 
 //POST http://localhost:3000/collection/{col_ID}
-exports.getAddNewImageResponse = function(hostUrl, collection, imageDescription) {
+exports.getAtomImageDescription = function(hostUrl, collection, imageDescription) {
 	var imageResponse = exports.getFormattedImageDescription(hostUrl, collection, imageDescription);
 	imageResponse["$"] = formattingObjects.addAtomAttribute();
 	return imageResponse;
@@ -44,10 +44,9 @@ function createImageDescriptionLinks(collectionId, imageId, hostUrl) {
 	var links = []
 		,href = hostUrl + "/collection/" + collectionId;
 	
-	links[0] = new restState.createLink("edit", "application/atom+xml", href);
-	links[1] = new restState.createLink("edit-media", "application/xml", href +  "/image" + imageId);
-	links[2] = new restState.createLink("edit", "application/atom+xml", href + "/image" + imageId + "/comment");
-	links[3] = new restState.createLink("edit", "application/atom+xml", href + "/metadata");
+	links[0] = new restState.createLink("edit-media", "application/atom+xml", href +  "/image" + imageId);
+	links[1] = new restState.createLink("edit", "application/atom+xml", href + "/image" + imageId + "/comment");
+	links[2] = new restState.createLink("edit", "application/atom+xml", href + "/metadata");
 	// links[4] = new restState.createLink("alternate", "application/xml", href + "?alt=xml");
 	// links[5] = new restState.createLink("alternate", "application/json", href + "?alt=json");
 	return links;

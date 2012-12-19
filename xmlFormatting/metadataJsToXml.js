@@ -15,7 +15,7 @@ exports.getAllCollectionTagsAtomFeed = function(updateTime, hostUrl, collection,
 	return serviceFeed;
 }
 
-exports.addNewCollectionTag = function(hostUrl, collection, tag) {
+exports.CollectionTagAtom = function(hostUrl, collection, tag) {
 	var entry = new Object();
 	entry["$"] = formattingObjects.addAtomAttribute();
 	entry["id"] =  "http://vac.co.uk/collection/" + collection.id + "/metadata/" + tag.id;
@@ -31,21 +31,21 @@ exports.addNewCollectionTag = function(hostUrl, collection, tag) {
 exports.getAllCollectionTagsXmlJson = function(collection, tags) {
 	var resultCollection = new Object();
 	resultCollection["$"] = formattingObjects.createSingleAttribute("id", collection.id);
-	resultCollection["metadata"] = createObjectTags(tags);
+	resultCollection["metadata"] = getCollectionTagsXmlJson(tags);
 	return resultCollection;
 }
 
-function createObjectTags(tags) {
+function getCollectionTagsXmlJson(tags) {
 	var resultTags = [];
 	
 	for (var i = 0; i < tags.length; i++) {
-		resultTags[i] = new getObjectFormattedTag(tags[i]);
+		resultTags[i] = exports.getCollectionTagXmlJson(tags[i]);
 	}
 	
 	return resultTags;
 }
 
-function getObjectFormattedTag(tag) {
+exports.getCollectionTagXmlJson = function(tag) {
 	var metadata = new Object(); 
 	metadata["$"] = formattingObjects.createSingleAttribute("id", tag.id);
 	//metadata["tag"] =  formattingObjects.titleToString(tag.title);
