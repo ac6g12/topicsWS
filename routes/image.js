@@ -20,42 +20,49 @@ exports.addNewImage = function (req, res) {
 		return;
 	}
 
+	var hostUrl = urlUtils.getHostUrl(req);
 	var imageDetails = new Object();
 	imageDetails.title = req.body.title;
-	imageDetails.summary = req.body.summary;
+	// not compulsory
+	if(req.body.summary) {
+		imageDetails.summary = req.body.summary;
+	}
 	
 	imageDetails.title = ensureImageCorrectTitle(imageDetails.title, req.files.image);
 	collectionId = req.params.colID;
 	
-	var storedImage = storage.saveImage(collectionId, imageDetails, req.files.image);
-	res.set('Content-Type', 'application/atom+xml');
-	res.set('Location', hostUrl + '/collection/' + collectionId + '/image/' + storedImage.id);
-	var imageId = storedImage;
-	var collection = storage.getCollection(collectionId);
-	var hostUrl = urlUtils.getHostUrl(req);
-	
-	var entry = imageJsToXml.getAtomImageDescription(hostUrl,
-		collection, storedImage);
-	
-	res.send(201, js2xml.parseJsonObjectToXml("entry", entry));
+	storage.saveImage(collectionId, imageDetails, req.files.image, function(err1, storedImage) {
+		storage.getCollection(collectionId, function(err2, collection) {
+			if(err1 || err2) {
+				req.send(500, "Couldn't save data");
+				return;
+			}
+			res.set('Content-Type', 'application/atom+xml');
+			res.set('Location', hostUrl + '/collection/' + collectionId + '/image/' + storedImage.id);
+			var entry = imageJsToXml.getAtomImageDescription(hostUrl, collection, storedImage);	
+			res.send(201, js2xml.parseJsonObjectToXml("entry", entry));
+		});
+	});
 }
 
 exports.getImage = function (req, res) {
 	res.set('Expires', 'Thu, 01 Dec 1994 16:00:00 GMT');
-	var storedCollection = storage.getCollection(req.params.colID);
-	var hostUrl = urlUtils.getHostUrl(req);
-	var imageDescription = storage.getCollectionImageDescription(
-		storedCollection.id, req.params.imgID);
-	if (storedCollection == null || imageDescription == null) {
-		res.send(404);
-	}
-	
-	var entry = imageJsToXml.getAtomImageDescription(hostUrl,
-		storedCollection, imageDescription);
+	storage.getCollection(req.params.colID, function(err1, storedCollection) {
+		storage.getCollectionImageDescription(req.params.colID, req.params.imgID, function(err2, imageDescription) {
+			if (err1 || err2) {
+				res.send(404);
+				return;
+			}
+			var hostUrl = urlUtils.getHostUrl(req);
+
+			var entry = imageJsToXml.getAtomImageDescription(hostUrl,
+						storedCollection, imageDescription);
 		
-	res.set('Content-Type', 'application/atom+xml');
-	res.set('Last-Modified', formattingObjects.getHttpHeaderLastModified(imageDescription.updated));
-	res.send(js2xml.parseJsonObjectToXml("entry", entry));
+			res.set('Content-Type', 'application/atom+xml');
+			res.set('Last-Modified', formattingObjects.getHttpHeaderLastModified(imageDescription.updated));
+			res.send(js2xml.parseJsonObjectToXml("entry", entry));
+		});
+	});
 }
 
 function isValidImageRequest(imageDetails, image) {
@@ -87,44 +94,45 @@ exports.updateImage = function(req, res) {
 		res.send(400);
 		return;
 	}
-	var storedCollection = storage.getCollection(req.params.colID);
-	var hostUrl = urlUtils.getHostUrl(req);
-	var storedImageDescription = storage.getCollectionImageDescription(
-		storedCollection.id, req.params.imgID);
-	if (storedCollection == null || storedImageDescription == null) {
-		res.send(404);
-	}
-
-	res.set('Expires', 'Thu, 01 Dec 1994 16:00:00 GMT');
-	res.set('Content-Type', 'application/atom+xml');
-	var ifUnmodifiedSince = req.get("If-Unmodified-Since");
-	if (checks.isModifiedSince(ifUnmodifiedSince, storedImageDescription.updated)) {
-		var entry = imageJsToXml.getAtomImageDescription(hostUrl,
-			storedCollection, storedImageDescription);
-		res.send(409, js2xml.parseJsonObjectToXml("entry", entry));
-	}
-	else {
-		updateImageDescription(storedImageDescription, imageDetails, req.files.image);		
-		var storedImage = storage.saveImage(storedCollection.id, imageDetails, req.files.image);
-		var entry = imageJsToXml.getAtomImageDescription(hostUrl,
-			storedCollection, storedImage);
-		res.send(js2xml.parseJsonObjectToXml("entry", entry));	
-	}
-	
+	storage.getCollection(req.params.colID, function(err1, storedCollection) {
+		storage.getCollectionImageDescription(req.params.colID, req.params.imgID, function(err2, storedImageDescription) {
+			if(err1 || err2) {
+				res.send(404);
+				return;
+			}
+			var hostUrl = urlUtils.getHostUrl(req);
+			res.set('Expires', 'Thu, 01 Dec 1994 16:00:00 GMT');
+			res.set('Content-Type', 'application/atom+xml');
+			var ifUnmodifiedSince = req.get("If-Unmodified-Since");
+			if (checks.isModifiedSince(ifUnmodifiedSince, storedImageDescription.updated)) {
+				var entry = imageJsToXml.getAtomImageDescription(hostUrl, storedCollection, storedImageDescription);
+				res.send(409, js2xml.parseJsonObjectToXml("entry", entry));
+			} else {
+				if(imageDetails.title) storedImageDescription.title = imageDetails.title;
+				if(imageDetails.summary) storedImageDescription.summary = imageDetails.summary;
+//				updateImageDescription(storedImageDescription, imageDetails, req.files.image);		
+				storage.saveImage(storedCollection.id, storedImageDescription, req.files.image, function(err, storedImage) {
+					if(err) {
+						res.send(500, "unable to save details");
+						return;
+					}
+					var entry = imageJsToXml.getAtomImageDescription(hostUrl, storedCollection, storedImage);
+					res.send(js2xml.parseJsonObjectToXml("entry", entry));
+				});
+					
+			}
+		});
+	});	
 }
 
 exports.deleteImage = function(req, res) {
-	var collectionId = req.params.colID;
-	var imageDescId = req.params.imgID;
-	var result = storage.deleteImage(collectionId, imageDescId);
-	
-	if (result) {
-		res.writeHead(204, {'Content-Type': 'text/plain'});
+	storage.deleteImage(req.params.colID, req.params.imgID, function(result) {
+		if (result) {
+			res.writeHead(204, {'Content-Type': 'text/plain'});
+		} else {
+			res.writeHead(404, {'Content-Type': 'text/plain'});
+		}
 		res.end();
-	}
-	else {
-		res.writeHead(404, {'Content-Type': 'text/plain'});
-		res.end();
-	}
+	});
 }
 

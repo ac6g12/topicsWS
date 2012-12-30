@@ -32,6 +32,6 @@ req.write(
   		"<author>"	+
     		"<name>Ales Cirnfus</name>" +
   		"</author>" +
-  		"<title>Best collection I've ever seen</title>" +
+  		"<title>Best collection I have ever seen</title>" +
 	"</entry>");
 req.end();

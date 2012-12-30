@@ -7,7 +7,9 @@ exports.formatXML = function(xmlString) {
 		if(node.charAt(0) == '/') {
 			offset--;
 		} else {
-			offset++;
+			if(node.substring(node.length-2) != '/>') {
+				offset++;
+			}
 		}
 		output += '<' + node;
 		if(node.charAt(node.length-1) == '>' && i < nodes.length - 1) {
