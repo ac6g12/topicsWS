@@ -27,7 +27,7 @@ function getCollectionReference(hostUrl) {
 		"application/atom+xml;type=entry");
 }
 function getCollectionImagesReference(hostUrl, collectionId) {
-	return formattingObjects.getCollectionReference(hostUrl + "/collection/" + collectionId, "Tagging service this collection",
+	return formattingObjects.getCollectionReference(hostUrl + "/collection/" + collectionId, "Image collection service",
 		"multipart/form-data");
 }
 //GET http://localhost:3000/collection/{col_ID}/

@@ -38,35 +38,27 @@ exports.addNewTag = function(req, res) {
 }
 
 exports.getAllTags = function(req, res) {
-
-	storage.getCollection(req.params.colID, function(err1, storedCollection) {
-		storage.getAllTags(req.params.colID, req.params.imgID, function(err2, tags) {
-			if(err1 || err2) {
-				res.send(404, "Tags not found");
+	storage.getAllTags(req.params.colID, req.params.imgID, function(err, tags) {
+		if(err) {
+			res.send(404, "Tags not found");
+			return;
+		}
+		storage.getCollection(req.params.colID, function(err, collection) {
+			if(err) {
+				res.send(500, "Unable to retrieve collection");
 				return;
 			}
-			res.set('Expires', 'Thu, 01 Dec 1994 16:00:00 GMT');
-			res.set('Last-Modified', formattingObjects.getHttpHeaderLastModified(storedCollection.updated));
-				
-			var representation = req.query.alt;
-			if (checks.isEmptyObject(req.query) && representation == undefined) {
-				res.set('Content-Type', 'application/atom+xml');
-				var serviceFeed = metadataJsToXml.getAllTagsAtomFeed(urlUtils.getHostUrl(req), tags, storedCollection, req.params.imgID);
-				res.send(js2xml.parseJsonObjectToXml("feed", serviceFeed));
+			if(req.params.imgID != undefined) {
+				storage.getCollectionImageDescription(req.params.colID, req.params.imgID, function(err, image) {
+					if (err) {
+						res.send(500, "Unable to retrieve image");
+						return;
+					}
+					processGetAllTags(req, res, tags, collection, image);
+				});
+				return;
 			}
-			else if (!checks.isEmptyObject(req.query) && representation == "xml") {
-				res.set('Content-Type', 'application/xml');
-				var xmlCollection = metadataJsToXml.getAllTagsXmlJson(tags, storedCollection.id, req.params.imgID);
-				res.send(js2xml.parseJsonObjectToXml("collection", xmlCollection));
-			}
-			else if (!checks.isEmptyObject(req.query) && representation == "json") {
-				res.set('Content-Type', 'application/json');
-				var jsonCollection = metadataJsToXml.getAllTagsXmlJson(tags, storedCollection.id, req.params.imgID);					
-				res.send(JSON.stringify(jsonCollection));
-			}
-			else {
-				res.send(400, "Bad requrest, invalid representation required: " + JSON.stringify(req.query));
-			}
+			processGetAllTags(req, res, tags, collection);
 		});
 	});
 }
@@ -82,24 +74,25 @@ exports.getTag = function(req, res) {
 			res.set('Expires', 'Thu, 01 Dec 1994 16:00:00 GMT');
 			res.set('Last-Modified', formattingObjects.getHttpHeaderLastModified(tag.updated))
 			var hostUrl = urlUtils.getHostUrl(req);
-			var representation = req.query.alt;
-			if (checks.isEmptyObject(req.query) && representation == undefined) {
-				res.set('Content-Type', 'application/atom+xml');
-				var entry = metadataJsToXml.getTagAtom(urlUtils.getHostUrl(req), tag, collection, req.params.imgID);
-				res.send(js2xml.parseJsonObjectToXml("entry", entry));
-			}
-			else if (!checks.isEmptyObject(req.query) && representation == "xml") {
-				res.set('Content-Type', 'application/xml');
-				var metadata = metadataJsToXml.getTagXmlJson(tag);
-				res.send(js2xml.parseJsonObjectToXml("metadata", metadata));
-			}
-			else if (!checks.isEmptyObject(req.query) && representation == "json") {
-				res.set('Content-Type', 'application/json');
-				var metadata = metadataJsToXml.getTagXmlJson(tag);				
-				res.send(JSON.stringify(metadata));
-			}
-			else {
-				res.send(400, "Bad requrest, invalid representation required: " + JSON.stringify(req.query));
+			switch (req.query.alt) {
+				case undefined:
+					res.set('Content-Type', 'application/atom+xml');
+					var entry = metadataJsToXml.getTagAtom(urlUtils.getHostUrl(req), tag, collection, req.params.imgID);
+					res.send(js2xml.parseJsonObjectToXml("entry", entry));
+					break;
+				case "xml":
+					res.set('Content-Type', 'application/xml');
+					var metadata = metadataJsToXml.getTagXmlJson(tag);
+					res.send(js2xml.parseJsonObjectToXml("metadata", metadata));
+					break;
+				case "json":
+					res.set('Content-Type', 'application/json');
+					var metadata = metadataJsToXml.getTagXmlJson(tag);				
+					res.send(JSON.stringify(metadata));
+					break;
+				default:
+					res.send(400, req.query.alt + " not supported");
+					break;
 			}
 		});
 	});
@@ -172,4 +165,30 @@ function isInvalidInputTag(entry) {
 		return true;
 	else
 		return false;
+}
+
+function processGetAllTags(req, res, tags, collection, image) {
+	res.set('Expires', 'Thu, 01 Dec 1994 16:00:00 GMT');
+	res.set('Last-Modified', formattingObjects.getHttpHeaderLastModified(collection.updated));
+				
+	switch (req.query.alt) {
+		case undefined: 
+			res.set('Content-Type', 'application/atom+xml');
+			var serviceFeed = metadataJsToXml.getAllTagsAtomFeed(urlUtils.getHostUrl(req), tags, collection, image);
+			res.send(js2xml.parseJsonObjectToXml("feed", serviceFeed));
+			break;
+		case "xml":
+			res.set('Content-Type', 'application/xml');
+			var xmlCollection = metadataJsToXml.getAllTagsXmlJson(tags, collection.id, req.params.imgID);
+			res.send(js2xml.parseJsonObjectToXml("collection", xmlCollection));
+			break;
+		case "json":
+			res.set('Content-Type', 'application/json');
+			var jsonCollection = metadataJsToXml.getAllTagsXmlJson(tags, collection.id, req.params.imgID);					
+			res.send(JSON.stringify(jsonCollection));
+			break;
+		default: 
+			res.send(400, req.query.alt + " not supported");
+			break;
+	}
 }

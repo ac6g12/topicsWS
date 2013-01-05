@@ -1,17 +1,27 @@
 var formattingObjects = require("./formattingObjects")
 	,restState = require("./restState");
 
-exports.getAllTagsAtomFeed = function(hostUrl, tags, collection, imgId) {
+exports.getAllTagsAtomFeed = function(hostUrl, tags, collection, image) {
+	var imgId = undefined;
 	var serviceFeed = new Object();
 	serviceFeed["$"] = formattingObjects.addAtomAttribute();
 	serviceFeed["id"] =  "http://vac.co.uk/collection/" + collection.id;
-	if(imgId) {
-		serviceFeed["id"] += "/image/" + imgId
+	if(image) {
+		imgId = image.id;
+		serviceFeed["id"] += "/image/" + imgId;
+		serviceFeed["title"] = image.title;
+		if (image.summary) {
+			serviceFeed["summary"] = image.summary;
+		}
+		serviceFeed["updated"] = image.updated;
+		serviceFeed["app:edited"] = image["app:edited"];
+	} else {
+		serviceFeed["title"] = collection.title;
+		serviceFeed["summary"] = collection.summary;
+		serviceFeed["updated"] = collection.updated;
+		serviceFeed["app:edited"] = collection["app:edited"];
 	}
 	serviceFeed["id"] += "/metadata/";
-	serviceFeed["title"] = collection.title;
-	serviceFeed["updated"] = collection.updated;
-	serviceFeed["app:edited"] = collection["app:edited"];
 	var referenceLink =	serviceFeed["id"].replace("http://vac.co.uk", hostUrl);
 	serviceFeed["app:collection"] = formattingObjects.getCollectionReference(referenceLink, 
 		"Tagging service", "application/atom+xml;type=entry");
