@@ -489,6 +489,10 @@ TESTING THE SERVER
 
 	node testname	(e.g. node 03POST_createCollection1)
 
+	Please note that it is more convenient to set up a text edit such as EditPlus (Windows) or Geany (Linux) to 
+	execute .js files with node.js. That way when you open the file in the editor you can see the description of 
+	the test request and the expected response.
+
 	Each test ouputs the request headers followed by the response headers and the response body (if applicable).
 
 	For convenience, the test script name starts with a number.  These numbers suggest a natural sequence of events
@@ -496,5 +500,7 @@ TESTING THE SERVER
 	test how the server handles unexpected requests (e.g. uploading an image to a non-existent collection).
 
 	Additional resources (such as image files) are stored in the 'resources' folder.
+
+	Content negotiation can be tested with scripts starting from number 50.
  
 	The test scripts assume that the service for collection management is running on localhost, port 3000.

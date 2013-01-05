@@ -665,20 +665,18 @@ exports.deleteAllComments = function(colId, imgId, callback) {
 // #################################### PRIVATE HELPER FUNCTIONS #################################
 
 function getNewId(path, callback) {
-	fs.readFile(path + "idCounter.txt", function(err, data) {
-		if(err) {
-			callback(err, null);
-			return;
-		}
+	try {
+		// use synchronous read/write to ensure that id increment is an atomic
+		// operation -> we don't want the same id to be issued twice if 
+		// we have concurrent requests (e.g. two image comments sent at
+		// the same time)
+		var data = fs.readFileSync(path + "idCounter.txt", "utf8");
 		var newId = parseInt(data) + 1;
-		fs.writeFile(path + "/idCounter.txt", newId, function (err) {
-            if(err) {
-				callback(err, null);
-			} else {
-				callback(null, newId);
-			}
-		});
-	});
+		fs.writeFileSync(path + "/idCounter.txt", newId, "utf8");
+		callback(null, newId);	//	everything ok - execute callback
+	} catch (err) {
+		callback(err, null);
+	}
 }
 
 function mkDir(path, callback) {

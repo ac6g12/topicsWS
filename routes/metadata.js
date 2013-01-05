@@ -5,32 +5,7 @@ var js2xml = require("../xmlFormatting/js2xml")
 	,urlUtils = require("../utils/urlUtils")
 	,checks = require("../utils/checks");
 
-//############ COLLECTION METADATA ##########################
-
-exports.deleteCollectionTag = function(req, res) {
-	var result = storage.deleteTag(req.params.tagID, req.params.colID, function(result) {
-		if (result) {
-			res.writeHead(204, {'Content-Type': 'text/plain'});
-		} else {
-			res.writeHead(404, {'Content-Type': 'text/plain'});
-		}
-		res.end();
-	});
-}
-
-exports.deleteAllCollectionTags = function(req, res) {
-	storage.deleteAllTags(req.params.colID, function(result) {
-		if (result) {
-			res.writeHead(204, {'Content-Type': 'text/plain'});
-		}
-		else {
-			res.writeHead(404, {'Content-Type': 'text/plain'});
-		}
-		res.end();
-	});
-}
-
-//############ IMAGE METADATA ##########################
+//############ METADATA HANDLERS ##########################
 
 exports.addNewTag = function(req, res) {
 	if (isInvalidInputTag(req.atomEntry["entry"])) {
@@ -100,7 +75,7 @@ exports.getTag = function(req, res) {
 	storage.getCollection(req.params.colID, function(err1, collection) {
 		storage.getTag(req.params.tagID, req.params.colID, req.params.imgID, function(err2, tag) {
 			if(err1 || err2) {
-				res.send(404);
+				res.send(404, "Tag not found");
 				return;
 			}
 
@@ -139,7 +114,7 @@ exports.updateTag = function(req, res) {
 	storage.getCollection(req.params.colID, function(err1, collection) {
 		storage.getTag(req.params.tagID, req.params.colID, req.params.imgID, function(err2, storedTag) {
 			if(err1 || err2) {
-				res.send(404);
+				res.send(404, "Tag not found");
 				return;
 			}
 			var ifUnmodifiedSince = req.get("If-Unmodified-Since");
@@ -156,7 +131,7 @@ exports.updateTag = function(req, res) {
 				storedTag["title"] = formattingObjects.ensureStringIsAtomTitle(updatedTag["title"]);
 				storage.saveTag(storedTag, collection.id, req.params.imgID, function(err, newTag) {
 					if(err) {
-						res.send(404, "Unable to save updated tag");
+						res.send(500, "Unable to save updated tag");
 						return;
 					}
 					var entry = metadataJsToXml.getTagAtom(urlUtils.getHostUrl(req), newTag, collection, req.params.imgID);

@@ -5,6 +5,6 @@ exports.parseJsonObjectToXml = function (rootName, jsonObject) {
 			attributeString: '$',
 			valueString : '_'});
 	//TODO - remove logging in production code
-	console.log(parsedXml);
+//	console.log(parsedXml);
 	return parsedXml;
 }

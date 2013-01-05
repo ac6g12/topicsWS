@@ -36,7 +36,6 @@ exports.collectionsPost = function (req, res) {
 exports.collectionsGet = function (req, res) {
 	storage.getAllCollections(function(err1, storedCollections) {
 		storage.getAllCollectionsUpdated(function(err2, updateTime) {
-			console.log(updateTime);
 			if(err1 || err2) {
 				res.send(404);
 				return;
@@ -54,7 +53,6 @@ exports.collectionsGet = function (req, res) {
 
 exports.getCollectionImages = function(req, res) {
 	storage.getCollection(req.params.colID, function(err, storedCollection) {
-		res.set('Expires', 'Thu, 01 Dec 1994 16:00:00 GMT');
 		if(err) {
 			res.send(404, "Collection not found");
 			return;
@@ -67,7 +65,8 @@ exports.getCollectionImages = function(req, res) {
 			}
 			var serviceFeed = collectionJsToXml.getCollectionImages(hostUrl,
 						storedCollection, imageDescriptions);
-		
+
+			res.set('Expires', 'Thu, 01 Dec 1994 16:00:00 GMT');
 			res.set('Content-Type', 'application/atom+xml');
 			res.set('Last-Modified', formattingObjects.getHttpHeaderLastModified(storedCollection.updated));
 			res.send(js2xml.parseJsonObjectToXml("feed", serviceFeed));
@@ -102,20 +101,20 @@ exports.updateCollectionProperties = function(req, res) {
 		res.send(400);
 		return;
 	}
-		
-	//TODO - validate newCollection
+
 	var ifUnmodifiedSince = req.get("If-Unmodified-Since");
 		
 	var hostUrl = urlUtils.getHostUrl(req);
 		
-	res.set('Content-Type', 'application/atom+xml');
-	//to prevent caching resources
-	res.set('Expires', 'Thu, 01 Dec 1994 16:00:00 GMT');	
 	storage.getCollection(req.params.colID, function(err, storedCollection ) {
 		if(err) {
 			res.send(404, "Collection not found");
 			return;
 		}
+
+		res.set('Content-Type', 'application/atom+xml');
+		//to prevent caching resources
+		res.set('Expires', 'Thu, 01 Dec 1994 16:00:00 GMT');
 		if (checks.isModifiedSince(ifUnmodifiedSince, storedCollection.updated)) {
 			var entry = new collectionJsToXml.updateCollectionProperties(urlUtils.getHostUrl(req), storedCollection);
 			res.send(409, js2xml.parseJsonObjectToXml("entry", entry));
@@ -125,7 +124,7 @@ exports.updateCollectionProperties = function(req, res) {
 			storedCollection["title"] = formattingObjects.ensureStringIsAtomTitle(storedCollection["title"]);
 			storage.saveCollection(storedCollection, function(err, newCollection) {
 				if(err) {
-					res.send(500, "Couldn't save updated collection");
+					res.send(500, "Unable to save updated collection");
 					return;
 				}
 				var entry = collectionJsToXml.updateCollectionProperties(urlUtils.getHostUrl(req), newCollection);

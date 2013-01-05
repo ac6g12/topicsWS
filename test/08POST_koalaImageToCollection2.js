@@ -18,7 +18,7 @@
 *	Body:				Atom Entry - current representation of the created image resource
 */
 
-var img = 'koala.jpg';
+var img = 'Koala.jpg';
 var fs = require('fs');
 var http = require('http')
 var out = require('./output');

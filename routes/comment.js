@@ -5,7 +5,7 @@ var js2xml = require("../xmlFormatting/js2xml")
 	,urlUtils = require("../utils/urlUtils")
 	,checks = require("../utils/checks");
 
-//############ COLLECTION COMMENTS ##########################
+//############ COMMENTS HANDLERS ##########################
 
 exports.addNewComment = function(req, res) {
 	if (! isValidComment(req.atomEntry["entry"])) {
@@ -52,12 +52,12 @@ exports.getAllComments = function(req, res) {
 			}
 			else if (!checks.isEmptyObject(req.query) && representation == "xml") {
 				res.set('Content-Type', 'application/xml');
-				var xmlCollection = commentJsToXml.getAllCommentsXmlJson(comments, storedCollection.id);
+				var xmlCollection = commentJsToXml.getAllCommentsXmlJson(comments, storedCollection.id, req.params.imgID);
 				res.send(js2xml.parseJsonObjectToXml("collection", xmlCollection));
 			}
 			else if (!checks.isEmptyObject(req.query) && representation == "json") {
 				res.set('Content-Type', 'application/json');
-				var jsonCollection = commentJsToXml.getAllCommentsXmlJson(comments, storedCollection.id);					
+				var jsonCollection = commentJsToXml.getAllCommentsXmlJson(comments, storedCollection.id, req.params.imgID);					
 				res.send(JSON.stringify(jsonCollection));
 			}
 			else {
@@ -70,7 +70,7 @@ exports.getAllComments = function(req, res) {
 exports.getComment = function(req, res) {
 	storage.getComment(req.params.comID, req.params.colID, req.params.imgID, function(err, comment) {
 		if(err) {
-			res.send(404);
+			res.send(404, "Comment not found");
 			return;
 		}
 
@@ -108,7 +108,7 @@ exports.updateComment = function(req, res) {
 	storage.getCollection(req.params.colID, function(err1, collection) {
 		storage.getComment(req.params.comID, req.params.colID, req.params.imgID, function(err2, storedComment) {
 			if(err1 || err2) {
-				res.send(404);
+				res.send(404, "Comment not found");
 				return;
 			}
 			var ifUnmodifiedSince = req.get("If-Unmodified-Since");
@@ -125,7 +125,7 @@ exports.updateComment = function(req, res) {
 				storedComment["author"] = updatedComment["author"];
 				storage.saveComment(storedComment, req.params.colID, req.params.imgID, function(err, newComment) {
 					if(err) {
-						res.send(404, "Unable to save updated comment");
+						res.send(500, "Unable to save updated comment");
 						return;
 					}
 					var entry = commentJsToXml.getCommentAtom(urlUtils.getHostUrl(req), newComment, req.params.colID, req.params.imgID);

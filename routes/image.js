@@ -16,7 +16,7 @@ function ensureImageCorrectTitle(imageDetailsTitle, image) {
 
 exports.addNewImage = function (req, res) {
 	if (req.files.image == undefined) {
-		req.send(400);
+		res.send(400);
 		return;
 	}
 
@@ -33,8 +33,11 @@ exports.addNewImage = function (req, res) {
 	
 	storage.saveImage(collectionId, imageDetails, req.files.image, function(err1, storedImage) {
 		storage.getCollection(collectionId, function(err2, collection) {
-			if(err1 || err2) {
-				req.send(500, "Couldn't save data");
+			if(err2) {
+				res.send(404, "Collection not found");
+				return;
+			} else if(err1) {
+				res.send(500, "Couldn't save data");
 				return;
 			}
 			res.set('Content-Type', 'application/atom+xml');
@@ -50,7 +53,7 @@ exports.getImage = function (req, res) {
 	storage.getCollection(req.params.colID, function(err1, storedCollection) {
 		storage.getCollectionImageDescription(req.params.colID, req.params.imgID, function(err2, imageDescription) {
 			if (err1 || err2) {
-				res.send(404);
+				res.send(404, "Target not found");
 				return;
 			}
 			var hostUrl = urlUtils.getHostUrl(req);
@@ -97,7 +100,7 @@ exports.updateImage = function(req, res) {
 	storage.getCollection(req.params.colID, function(err1, storedCollection) {
 		storage.getCollectionImageDescription(req.params.colID, req.params.imgID, function(err2, storedImageDescription) {
 			if(err1 || err2) {
-				res.send(404);
+				res.send(404, "Target not found");
 				return;
 			}
 			var hostUrl = urlUtils.getHostUrl(req);
@@ -109,8 +112,7 @@ exports.updateImage = function(req, res) {
 				res.send(409, js2xml.parseJsonObjectToXml("entry", entry));
 			} else {
 				if(imageDetails.title) storedImageDescription.title = imageDetails.title;
-				if(imageDetails.summary) storedImageDescription.summary = imageDetails.summary;
-//				updateImageDescription(storedImageDescription, imageDetails, req.files.image);		
+				if(imageDetails.summary) storedImageDescription.summary = imageDetails.summary;		
 				storage.saveImage(storedCollection.id, storedImageDescription, req.files.image, function(err, storedImage) {
 					if(err) {
 						res.send(500, "unable to save details");
