@@ -378,7 +378,7 @@ exports.deleteImage = function(colId, imgId, callback) {
 		}
 		try {
 			// remove collection dir -> can throw exception
-			wrench.rmdirSyncRecursive(STORE_ROOT+ colId + "/images/" + imgId, false);
+			wrench.rmdirSyncRecursive(STORE_ROOT + colId + "/images/" + imgId, false);
 			// try to remove assoc binary img file
 			fs.unlink("." + imgDetails.path);
 			fs.writeFile(STORE_ROOT + colId + "/update.txt", new Date().toISOString());
